@@ -155,3 +155,29 @@ create policy "Protected insert comments"
 on public.comments for insert
 to anon
 with check (public.check_portal_key());
+
+-- ============================================================
+-- Migration: wish tracking split into released vs caught
+-- ============================================================
+
+-- RSVPs: rename old 'wishes' column to 'wishes_released', add 'wishes_caught'
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name   = 'rsvps'
+      and column_name  = 'wishes'
+  ) then
+    alter table public.rsvps rename column wishes to wishes_released;
+  end if;
+end $$;
+
+alter table public.rsvps
+  add column if not exists wishes_released int not null default 0 check (wishes_released >= 0),
+  add column if not exists wishes_caught   int not null default 0 check (wishes_caught   >= 0);
+
+-- Comments: add both wish-tracking columns
+alter table public.comments
+  add column if not exists wishes_released int not null default 0 check (wishes_released >= 0),
+  add column if not exists wishes_caught   int not null default 0 check (wishes_caught   >= 0);

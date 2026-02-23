@@ -98,10 +98,10 @@ function wireHandlers(supabase) {
       guests: Math.min(Number(formData.get("guests") || 0), 1),
       message: normalizeOptional(formData.get("message"))
     };
-    // Include number of wishes (detached petals) the user has cast this session
+    // Include wishes released (total petals blown) and caught this session
     try {
-      const wishes = Number(localStorage.getItem('dandelion_total_wishes_v1') || 0);
-      payload.wishes = wishes;
+      payload.wishes_released = Number(localStorage.getItem('dandelion_total_wishes_v1') || 0);
+      payload.wishes_caught    = Number(localStorage.getItem('dandelion_caught_wishes_v1')  || 0);
     } catch (e) { /* ignore */ }
 
     const { error } = await supabase.from("rsvps").insert(payload);
@@ -121,9 +121,14 @@ function wireHandlers(supabase) {
 
     const formData = new FormData(commentForm);
     const payload = {
-      name: String(formData.get("name") || "").trim(),
+      name:    String(formData.get("name")    || "").trim(),
       comment: String(formData.get("comment") || "").trim()
     };
+    // Log wishes released and caught at time of guestbook submission
+    try {
+      payload.wishes_released = Number(localStorage.getItem('dandelion_total_wishes_v1') || 0);
+      payload.wishes_caught   = Number(localStorage.getItem('dandelion_caught_wishes_v1')  || 0);
+    } catch (e) { /* ignore */ }
 
     const { error } = await supabase.from("comments").insert(payload);
     if (error) {
@@ -145,7 +150,7 @@ async function refreshAttendees(supabase) {
   attendeeList.innerHTML = "<li>Loading...</li>";
   const { data, error } = await supabase
     .from("rsvps")
-    .select("name, attending, guests, message, wishes")
+    .select("name, attending, guests, message, wishes_released, wishes_caught")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -162,49 +167,9 @@ async function refreshAttendees(supabase) {
   attendeeList.innerHTML = "";
   data.forEach((row) => {
     const item = document.createElement("li");
-    const messageSuffix = row.message ? ` — \"${row.message}\"` : "";
-
-    const info = document.createElement('span');
-    info.className = 'attendee-info';
-    info.textContent = `${row.name} (${row.attending}, +${row.guests})${messageSuffix}`;
-
-    // Seed line for wishes: one horizontal packed row of seed svgs
-    const seedLine = document.createElement('span');
-    seedLine.className = 'seed-line';
-
-    const wishes = Number(row.wishes || 0);
-    const count = Math.max(0, wishes);
-    const seedSrc = 'assets/single_dandelion_seed.svg';
-
-    // Append info + seed container first so we can measure available width
-    item.appendChild(info);
-    item.appendChild(seedLine);
+    const messageSuffix = row.message ? ` — "${row.message}"` : "";
+    item.textContent = `${row.name} (${row.attending}, +${row.guests})${messageSuffix}`;
     attendeeList.appendChild(item);
-
-    // Measure available width for the seed row (fall back to 120px)
-    const lineWidth = Math.max(0, seedLine.getBoundingClientRect().width || item.clientWidth || 120);
-
-    // Compute a seed height that aims to be roughly twice the previous visual size,
-    // but allow it to shrink when there are many seeds so they still fit horizontally.
-    const computedHeight = Math.floor((lineWidth / Math.max(1, count)) * 0.1);
-    const seedHeight = Math.max(21, Math.min(80, computedHeight)); // enforce min height ~28px
-
-    for (let i = 0; i < count; i++) {
-      const img = document.createElement('img');
-      img.src = seedSrc;
-      img.alt = '';
-      img.className = 'seed';
-      // enforce a consistent height for all seeds so they line up; width auto preserves aspect ratio
-      img.style.height = `${seedHeight}px`;
-      img.style.width = 'auto';
-
-      // Slight rotation variance
-      const rot = (Math.random() * 10) - 5; // -20..+20deg
-      const verticalOffset = Math.random() * 8 - 4; // -2..+2px
-      img.style.marginTop = `${verticalOffset}px`;
-      img.style.transform = `rotate(${rot}deg)`;
-      seedLine.appendChild(img);
-    }
   });
 }
 
@@ -212,8 +177,9 @@ async function refreshComments(supabase) {
   commentList.innerHTML = "<li>Loading...</li>";
   const { data, error } = await supabase
     .from("comments")
-    .select("name, comment")
-    .order("created_at", { ascending: false })
+    .select("name, comment, wishes_caught")
+    .order("wishes_caught", { ascending: false })
+    .order("created_at",   { ascending: false })
     .limit(100);
 
   if (error) {
@@ -226,11 +192,46 @@ async function refreshComments(supabase) {
     return;
   }
 
+  const seedSrc = 'assets/single_dandelion_seed.svg';
+
   commentList.innerHTML = "";
-  data.forEach((row) => {
+  data.forEach((row, index) => {
     const item = document.createElement("li");
-    item.textContent = `${row.name}: ${row.comment}`;
-    commentList.appendChild(item);
+
+    const info = document.createElement('span');
+    info.className = 'attendee-info';
+    const rank = index + 1;
+    info.textContent = `#${rank} ${row.name}: ${row.comment}`;
+    item.appendChild(info);
+
+    // Seed row showing number of wishes caught
+    const caught = Math.max(0, Number(row.wishes_caught || 0));
+    if (caught > 0) {
+      const seedLine = document.createElement('span');
+      seedLine.className = 'seed-line';
+      item.appendChild(seedLine);
+      commentList.appendChild(item);
+
+      const lineWidth = Math.max(0, seedLine.getBoundingClientRect().width || item.clientWidth || 120);
+      const computedHeight = Math.floor((lineWidth / Math.max(1, caught)) * 0.1);
+      const seedHeight = Math.max(21, Math.min(80, computedHeight));
+
+      for (let i = 0; i < caught; i++) {
+        const img = document.createElement('img');
+        img.src = seedSrc;
+        img.alt = '';
+        img.className = 'seed';
+        img.style.height = `${seedHeight}px`;
+        img.style.width = 'auto';
+        const rot = (Math.random() * 10) - 5;
+        const verticalOffset = Math.random() * 8 - 4;
+        img.style.marginTop = `${verticalOffset}px`;
+        img.style.transform = `rotate(${rot}deg)`;
+        seedLine.appendChild(img);
+      }
+    } else {
+      commentList.appendChild(item);
+    }
   });
 }
 
