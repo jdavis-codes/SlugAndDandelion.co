@@ -98,6 +98,11 @@ function wireHandlers(supabase) {
       guests: Math.min(Number(formData.get("guests") || 0), 1),
       message: normalizeOptional(formData.get("message"))
     };
+    // Include number of wishes (detached petals) the user has cast this session
+    try {
+      const wishes = Number(localStorage.getItem('dandelion_total_wishes_v1') || 0);
+      payload.wishes = wishes;
+    } catch (e) { /* ignore */ }
 
     const { error } = await supabase.from("rsvps").insert(payload);
     if (error) {

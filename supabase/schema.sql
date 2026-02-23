@@ -6,6 +6,7 @@ create table if not exists public.rsvps (
   attending text not null check (attending in ('yes', 'no', 'maybe')),
   guests int not null default 0 check (guests >= 0 and guests <= 1),
   message text
+  , wishes int not null default 0
 );
 
 create table if not exists public.comments (
