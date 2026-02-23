@@ -31,12 +31,19 @@
     "Modern tissue paper is engineered for softness and absorbency."
   ];
 
-  let x = 18;
-  let direction = 1;
-  let speed = 0.4;
+  // Restore position from previous page if available
+  const _saved = (() => {
+    try { return JSON.parse(sessionStorage.getItem("sd_sluggy_state") || "null"); }
+    catch (e) { return null; }
+  })();
 
-  let y = 0;
-  let vy = 4.8;
+  let x         = (_saved && _saved.x         != null) ? _saved.x         : 18;
+  let direction = (_saved && _saved.direction  != null) ? _saved.direction : 1;
+  let speed     = (_saved && _saved.speed      != null) ? _saved.speed     : 0.4;
+  let y         = (_saved && _saved.y          != null) ? _saved.y         : 0;
+  let vy        = (_saved && _saved.vy         != null) ? _saved.vy        : 4.8;
+  let slugAngle = (_saved && _saved.slugAngle  != null) ? _saved.slugAngle : 0;
+
   const gravity = 0.22;
   const bounceForce = 4.8;
 
@@ -48,8 +55,7 @@
   let lastFactIndex = -1;
 
   // ANIMATION MODE: Set to false to return to the bouncing behavior
-  let isSlugMode = true; 
-  let slugAngle = 0;
+  let isSlugMode = true;
   
   // Transition state
   let isStopping = false;
@@ -239,6 +245,22 @@
   sluggy.addEventListener("load", refreshSize);
   window.addEventListener("resize", refreshSize);
   window.addEventListener("resize", updateBubblePosition);
+
+  function saveState() {
+    try {
+      sessionStorage.setItem("sd_sluggy_state", JSON.stringify({
+        x, direction, speed, y, vy, slugAngle
+      }));
+    } catch (e) { /* ignore quota errors */ }
+  }
+
+  // Save on every navigation away from this page
+  window.addEventListener("pagehide", saveState);
+  // Fallback for browsers that don't fire pagehide reliably
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") saveState();
+  });
+
   hitbox.addEventListener("click", () => {
     if (paused) {
       resumeRun();
