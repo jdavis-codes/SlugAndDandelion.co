@@ -42,6 +42,17 @@ body {
   padding: 5px 0;
 }
 
+.event-banner {
+  background: #ffff99;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  padding: 10px 8px;
+}
+
 .sidebar {
   background: #cecece;
   border-right: 1px dashed #000;
@@ -72,6 +83,7 @@ a {
 .feature-table {
   background: #f5f5f5;
   margin: 12px 0;
+  font-size: 8pt;
 }
 
 .feature-table th {
