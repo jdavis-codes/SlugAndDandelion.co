@@ -74,7 +74,7 @@
       HIT_RADIUS: 30,
       BOTTOM_BUFFER_PX: 120 // petals are catchable only when above (viewportHeight - BOTTOM_BUFFER_PX)
     }, // px (screen space)
-    DEBUG: { SHOW_HITBOX: true } // show hit radius for detached petals
+    DEBUG: { SHOW_HITBOX: false } // show hit radius for detached petals
     ,
     FX: {
       SEED_FLY_MS: 1000, // ms for the seed flying animation when a wish is caught
