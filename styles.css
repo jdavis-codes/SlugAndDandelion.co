@@ -53,6 +53,93 @@ body {
   padding: 10px 8px;
 }
 
+.wish-box {
+  color: #fff;
+  width: min(980px, 100%);
+  margin: 6px 0px;
+  padding: 6px;
+  background: url(assets/stars.png);
+  background-size: 100% 100%;
+  background-position: center;
+  /* border: 2px outset #888;
+  border-spacing: 0px;
+  border-width: 3px;
+  outline: 1px solid #000; */
+  text-align: left;
+  font-family: Arial, Helvetica, sans-serif;
+  /* border-collapse: collapse;
+  border-spacing: 0; */
+}
+
+.wish-box td {
+  width: 100%;
+  border: none;
+  padding: 0;
+}
+
+.wish-box-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.wish-box.reveal-bounce {
+  animation: wish-box-bounce-reveal 420ms ease-out;
+}
+
+@keyframes wish-box-bounce-reveal {
+  0% { transform: scale(0.86) translateY(-6px); opacity: 0; }
+  58% { transform: scale(1.06) translateY(0); opacity: 1; }
+  78% { transform: scale(0.98); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Catch ripple – expanding ring that confirms a successful petal catch */
+.catch-ripple {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  border: 2px solid rgba(255, 252, 200, 0.92);
+  box-shadow: 0 0 6px 1px rgba(255, 240, 120, 0.5);
+  animation: catch-ripple-expand 620ms ease-out forwards;
+}
+
+@keyframes catch-ripple-expand {
+  0%   { transform: scale(0.2); opacity: 1; }
+  100% { transform: scale(var(--ripple-scale-end, 3.2)); opacity: 0; }
+}
+
+.wish-box-title {
+  font-weight: bold;
+  /* font-size: 12px; */
+  letter-spacing: 0.6px;
+}
+
+.wish-box-sub {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.wish-seed-row {
+  overflow: visible;
+  white-space: nowrap;
+  width: 100%;
+  flex: 1 1 auto;
+  align-items: center;
+}
+
+.wish-seed-row img {
+  display: inline-block;
+  height: 14px;
+  width: auto;
+  margin-right: -3px;
+  vertical-align: middle;
+  pointer-events: none;
+}
+
 /* Dandelion (gentle sway) */
 .dandelion-container {
   position: absolute;
@@ -113,10 +200,10 @@ a {
 
 /* Dandelion seed line for RSVP wishes */
 .seed-line {
-  display: flex; /* fill the width and keep seeds on a single horizontal line */
+  display: inline;
   width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
+  /* white-space: nowrap; */
+  overflow: visible;
   margin-left: 0;
   margin-top: 6px;
   align-items: center;

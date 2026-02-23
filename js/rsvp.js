@@ -172,13 +172,6 @@ async function refreshAttendees(supabase) {
     const seedLine = document.createElement('span');
     seedLine.className = 'seed-line';
 
-    // seed head image (stays behind when seeds are gone)
-    const head = document.createElement('img');
-    head.className = 'seed-head';
-    head.src = 'assets/dandelion_dried_seed_head.svg';
-    head.alt = '';
-    seedLine.appendChild(head);
-
     const wishes = Number(row.wishes || 0);
     const count = Math.max(0, wishes);
     const seedSrc = 'assets/single_dandelion_seed.svg';
@@ -188,26 +181,13 @@ async function refreshAttendees(supabase) {
     item.appendChild(seedLine);
     attendeeList.appendChild(item);
 
-    if (count <= 0) {
-      // no seeds — mark head as released and leave it visible
-      head.classList.remove('swaying');
-      head.classList.add('released');
-      continue;
-    }
-
     // Measure available width for the seed row (fall back to 120px)
     const lineWidth = Math.max(0, seedLine.getBoundingClientRect().width || item.clientWidth || 120);
 
     // Compute a seed height that aims to be roughly twice the previous visual size,
     // but allow it to shrink when there are many seeds so they still fit horizontally.
-    const computedHeight = Math.floor((lineWidth / Math.max(1, count)) * 0.9);
-    const seedHeight = Math.max(28, Math.min(80, computedHeight)); // enforce min height ~28px
-
-    // size the head proportionally (about twice the seed height)
-    head.style.height = `${Math.min(160, Math.max(40, Math.floor(seedHeight * 1.9)))}px`;
-    head.style.width = 'auto';
-    head.classList.remove('released');
-    head.classList.add('swaying');
+    const computedHeight = Math.floor((lineWidth / Math.max(1, count)) * 0.1);
+    const seedHeight = Math.max(21, Math.min(80, computedHeight)); // enforce min height ~28px
 
     for (let i = 0; i < count; i++) {
       const img = document.createElement('img');
