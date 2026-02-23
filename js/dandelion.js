@@ -42,7 +42,7 @@
   // Fetch SVG once and clone for each instance
   let svgText;
   try {
-    const response = await fetch('assets/dandelion_dried.svg');
+    const response = await fetch('assets/dandelion_dried_seed_head.svg');
     if (!response.ok) throw new Error('SVG not found');
     svgText = await response.text();
   } catch (err) {
@@ -58,6 +58,10 @@
   } catch (e) { releaseMap = []; }
 
   // Create instances
+  // global mouse for jostle
+  const mousePos = { x: -9999, y: -9999, t: 0 };
+  document.addEventListener('mousemove', (e) => { mousePos.x = e.clientX; mousePos.y = e.clientY; mousePos.t = performance.now(); });
+
   positions.forEach((pos, idx) => {
     const container = document.createElement('div');
     container.className = 'dandelion-container';
@@ -84,11 +88,18 @@
       svg.setAttribute('width', '120px');
       svg.style.height = 'auto';
       svg.style.overflow = 'visible';
+      // Rotate around the base (bottom center) for natural sway
+      svg.style.transformOrigin = '50% 100%';
+      svg.style.willChange = 'transform';
 
       // Find elements inside this svg instance
       const stemGroup = svg.querySelector('[id="stem"]') || svg.querySelector('#stem');
       const stem = stemGroup ? stemGroup.querySelector('path') : null;
       const petals = Array.from(svg.querySelectorAll('[inkscape\\:label="petal"]'));
+
+      // Seed head element (should move with attached seeds)
+      const seedHead = svg.querySelector('[inkscape\\:label="seed_head"]') || svg.querySelector('#seed_head');
+      const seedHeadBaseTransform = seedHead ? seedHead.getAttribute('transform') || '' : '';
 
       if (!stemGroup || !stem || petals.length === 0) {
         console.error('Could not find stem or petals in SVG instance');
@@ -106,10 +117,11 @@
 
       // Per-instance sway configuration (gives each dandelion unique motion)
       const swayConfig = {
-        speedFactor: 0.9 + Math.random() * 1.2, // slower or faster
-        amplitude: 10 + Math.random() * 12, // horizontal sway magnitude
-        verticalAmplitude: 1 + Math.random() * 4, // vertical sway magnitude
-        phase: Math.random() * Math.PI * 2
+        speedFactor: 1.1 + Math.random() * 1.0, // slower or faster
+        amplitude: 1 + Math.random() * 2, // horizontal sway magnitude
+        verticalAmplitude: 1 + Math.random() * 2, // vertical sway magnitude
+        phase: Math.random() * Math.PI * 2,
+        rotationAmplitude: 10 + Math.random() * 5 // degrees for back-and-forth rotation
       };
 
       // Parse stem path
@@ -144,7 +156,13 @@
         velocityY: 0,
         gravity: 0,
         spin: 0,
-        phase: Math.random() * Math.PI * 2
+        phase: Math.random() * Math.PI * 2,
+        // per-petal spring state so released petals jostle independently
+        springX: 0,
+        springY: 0,
+        springVelX: 0,
+        springVelY: 0,
+        springInitialized: false
       }));
 
       // If we have persisted release timestamps for this instance, apply them
@@ -166,6 +184,11 @@
               st.releasedAt = performance.now() - age; // Set animation start time in the past
               st.anchorX = 0; // Can't know original anchor, start from center
               st.anchorY = 0;
+              st.springX = 0;
+              st.springY = 0;
+              st.springVelX = 0;
+              st.springVelY = 0;
+              st.springInitialized = false;
               st.velocityX = (Math.random() - 0.5) * 0.01;
               st.velocityY = -0.012 - Math.random() * 0.006;
               st.gravity = 0.0000015;
@@ -177,6 +200,18 @@
 
       let lastAttachedDX = 0;
       let lastAttachedDY = 0;
+      let frozenTargetX = 0;
+      let frozenTargetY = 0;
+
+      // Spring state for seed-head jostle
+      let springX = 0;
+      let springY = 0;
+      let springVelX = 0;
+      let springVelY = 0;
+      const SPRING_STIFFNESS = 0.02;
+      const SPRING_DAMPING = 0.86;
+      const JOSTLE_THRESHOLD = 100; // pixels
+      const JOSTLE_IMPULSE = 0.9;
 
       function releaseOnePetal() {
         for (let i = petalStates.length - 1; i >= 0; i -= 1) {
@@ -186,8 +221,15 @@
             state.releasedAt = performance.now();
             const releaseTime = Date.now();
             
-            state.anchorX = lastAttachedDX;
-            state.anchorY = lastAttachedDY;
+            // record the springed head position as the anchor so released petals keep current offset
+            state.anchorX = (typeof springX === 'number' && !isNaN(springX)) ? springX : lastAttachedDX;
+            state.anchorY = (typeof springY === 'number' && !isNaN(springY)) ? springY : lastAttachedDY;
+            // initialize per-petal spring at release
+            state.springX = state.anchorX;
+            state.springY = state.anchorY;
+            state.springVelX = 0;
+            state.springVelY = 0;
+            state.springInitialized = true;
             // gentle left/right drift
             state.velocityX = (Math.random() - 0.5) * 0.01;
             // always upward drift
@@ -211,6 +253,13 @@
               const cur = Number(localStorage.getItem(TOTAL_KEY) || 0);
               localStorage.setItem(TOTAL_KEY, String(cur + 1));
             } catch (e) {}
+
+            // If that was the last attached petal, freeze the last head position
+            if (petalStates.every(s => s.released)) {
+              frozenTargetX = lastAttachedDX;
+              frozenTargetY = lastAttachedDY;
+            }
+
             return;
           }
         }
@@ -225,21 +274,40 @@
         const dX = Math.sin(swayAngle) * swayConfig.amplitude;
         const dY = (Math.cos(swayAngle * 2) - 1) * swayConfig.verticalAmplitude;
 
-        const currentStartX = startX + dX;
-        const currentStartY = startY + dY;
+        // Convert the spring displacement (in document/screen space) back into
+        // the stem's local coordinate space so we can bend the path without
+        // moving the SVG root. Use the inverse of the 2x2 matrix [a c; b d].
+        const det = a * d - b * c;
+        let springLocalX = 0;
+        let springLocalY = 0;
+        if (det !== 0) {
+          springLocalX = (d * springX - c * springY) / det;
+          springLocalY = (-b * springX + a * springY) / det;
+        }
 
-        // Keep root fixed by inverting the relative end
-        const currentRelEndX = relEndX - dX;
-        const currentRelEndY = relEndY - dY;
+        // total local displacement applied to the stem start (sway + spring)
+        const totalLocalX = dX + springLocalX;
+        const totalLocalY = dY + springLocalY;
+
+        const currentStartX = startX + totalLocalX;
+        const currentStartY = startY + totalLocalY;
+
+        // Keep root fixed by inverting the relative end using the same total offset
+        const currentRelEndX = relEndX - totalLocalX;
+        const currentRelEndY = relEndY - totalLocalY;
 
         // Control points adjusted for natural bend; scale with amplitude
-        const currentRelC1X = relC1X - dX * 0.7;
-        const currentRelC1Y = relC1Y - dY * 0.8;
-        const currentRelC2X = relC2X - dX * 0.35;
-        const currentRelC2Y = relC2Y - dY * 0.25;
+        const currentRelC1X = relC1X - totalLocalX * 0.7;
+        const currentRelC1Y = relC1Y - totalLocalY * 0.8;
+        const currentRelC2X = relC2X - totalLocalX * 0.35;
+        const currentRelC2Y = relC2Y - totalLocalY * 0.25;
 
         const newD = `m ${currentStartX},${currentStartY} c ${currentRelC1X},${currentRelC1Y} ${currentRelC2X},${currentRelC2Y} ${currentRelEndX},${currentRelEndY}`;
         stem.setAttribute('d', newD);
+
+        // Apply a gentle back-and-forth rotation to the whole SVG
+        const rotationDeg = Math.sin(swayAngle) * swayConfig.rotationAmplitude;
+        svg.style.transform = `rotate(${rotationDeg}deg)`;
 
         // Map local displacement into SVG/document coordinate space for petals
         const transformedDX = a * dX + c * dY;
@@ -247,10 +315,56 @@
         lastAttachedDX = transformedDX;
         lastAttachedDY = transformedDY;
 
+
+        const targetX = transformedDX
+        const targetY = transformedDY
+
+        // Initialize spring on first frame
+        if (springX === 0 && springY === 0) {
+          springX = targetX;
+          springY = targetY;
+        }
+
+        // Jostle from recent mouse movement near the head
+        if (seedHead) {
+          try {
+            const bbox = seedHead.getBBox();
+            const pt = svg.createSVGPoint();
+            pt.x = bbox.x + bbox.width / 2;
+            pt.y = bbox.y + bbox.height / 2;
+            const screenPt = pt.matrixTransform(seedHead.getScreenCTM());
+            const dxMouse = screenPt.x - mousePos.x;
+            const dyMouse = screenPt.y - mousePos.y;
+            const dist = Math.hypot(dxMouse, dyMouse);
+            if (dist > 0 && mousePos.t && (performance.now() - mousePos.t) < 250 && dist < JOSTLE_THRESHOLD) {
+              const strength = (1 - dist / JOSTLE_THRESHOLD) * JOSTLE_IMPULSE;
+              // impulse away from cursor
+              springVelX += (dxMouse / dist) * strength;
+              springVelY += (dyMouse / dist) * strength;
+            }
+          } catch (e) {}
+        }
+
+        // Spring integration for the seed head
+        const dxSpring = targetX - springX;
+        const dySpring = targetY - springY;
+        springVelX += dxSpring * SPRING_STIFFNESS;
+        springVelY += dySpring * SPRING_STIFFNESS;
+        springVelX *= SPRING_DAMPING;
+        springVelY *= SPRING_DAMPING;
+        springX += springVelX;
+        springY += springVelY;
+
+        // Move the seed head using springed values so it can jostle
+        if (seedHead) {
+          seedHead.setAttribute('transform', `${seedHeadBaseTransform} translate(${springX}, ${springY})`);
+        }
+
         petalStates.forEach(state => {
           if (!state.released) {
             state.element.style.opacity = '1';
-            state.element.setAttribute('transform', `${state.baseTransform} translate(${transformedDX}, ${transformedDY})`);
+            // attached petals follow the springed head so they jostle together
+            state.element.setAttribute('transform', `${state.baseTransform} translate(${springX}, ${springY})`);
             return;
           }
 
@@ -263,10 +377,48 @@
           const rotation = state.spin * elapsed;
           const opacity = Math.max(0, 1 - elapsed / FADE_DURATION_MS);
 
+          // target for this released petal (anchor + its own drift)
+          const petalTargetX = state.anchorX + driftX;
+          const petalTargetY = state.anchorY + driftY;
+
+          // initialize per-petal spring if needed
+          if (!state.springInitialized) {
+            state.springX = petalTargetX;
+            state.springY = petalTargetY;
+            state.springInitialized = true;
+          }
+
+          // per-petal jostle from mouse
+          try {
+            const pbbox = state.element.getBBox();
+            const ppt = svg.createSVGPoint();
+            ppt.x = pbbox.x + pbbox.width / 2;
+            ppt.y = pbbox.y + pbbox.height / 2;
+            const pscreen = ppt.matrixTransform(state.element.getScreenCTM());
+            const mdx = pscreen.x - mousePos.x;
+            const mdy = pscreen.y - mousePos.y;
+            const pdist = Math.hypot(mdx, mdy);
+            if (pdist > 0 && mousePos.t && (performance.now() - mousePos.t) < 250 && pdist < JOSTLE_THRESHOLD) {
+              const pstrength = (1 - pdist / JOSTLE_THRESHOLD) * JOSTLE_IMPULSE;
+              state.springVelX += (mdx / pdist) * pstrength;
+              state.springVelY += (mdy / pdist) * pstrength;
+            }
+          } catch (e) {}
+
+          // per-petal spring integration
+          const pdx = petalTargetX - state.springX;
+          const pdy = petalTargetY - state.springY;
+          state.springVelX += pdx * (SPRING_STIFFNESS * 0.9);
+          state.springVelY += pdy * (SPRING_STIFFNESS * 0.9);
+          state.springVelX *= (SPRING_DAMPING * 0.96);
+          state.springVelY *= (SPRING_DAMPING * 0.96);
+          state.springX += state.springVelX;
+          state.springY += state.springVelY;
+
           state.element.style.opacity = String(opacity);
           state.element.setAttribute(
             'transform',
-            `${state.baseTransform} translate(${state.anchorX + driftX}, ${state.anchorY + driftY}) rotate(${rotation})`
+            `${state.baseTransform} translate(${state.springX}, ${state.springY}) rotate(${rotation})`
           );
         });
 

@@ -145,7 +145,7 @@ async function refreshAttendees(supabase) {
   attendeeList.innerHTML = "<li>Loading...</li>";
   const { data, error } = await supabase
     .from("rsvps")
-    .select("name, attending, guests, message")
+    .select("name, attending, guests, message, wishes")
     .order("created_at", { ascending: false })
     .limit(100);
 
@@ -163,8 +163,68 @@ async function refreshAttendees(supabase) {
   data.forEach((row) => {
     const item = document.createElement("li");
     const messageSuffix = row.message ? ` — \"${row.message}\"` : "";
-    item.textContent = `${row.name} (${row.attending}, +${row.guests})${messageSuffix}`;
+
+    const info = document.createElement('span');
+    info.className = 'attendee-info';
+    info.textContent = `${row.name} (${row.attending}, +${row.guests})${messageSuffix}`;
+
+    // Seed line for wishes: one horizontal packed row of seed svgs
+    const seedLine = document.createElement('span');
+    seedLine.className = 'seed-line';
+
+    // seed head image (stays behind when seeds are gone)
+    const head = document.createElement('img');
+    head.className = 'seed-head';
+    head.src = 'assets/dandelion_dried_seed_head.svg';
+    head.alt = '';
+    seedLine.appendChild(head);
+
+    const wishes = Number(row.wishes || 0);
+    const count = Math.max(0, wishes);
+    const seedSrc = 'assets/single_dandelion_seed.svg';
+
+    // Append info + seed container first so we can measure available width
+    item.appendChild(info);
+    item.appendChild(seedLine);
     attendeeList.appendChild(item);
+
+    if (count <= 0) {
+      // no seeds — mark head as released and leave it visible
+      head.classList.remove('swaying');
+      head.classList.add('released');
+      continue;
+    }
+
+    // Measure available width for the seed row (fall back to 120px)
+    const lineWidth = Math.max(0, seedLine.getBoundingClientRect().width || item.clientWidth || 120);
+
+    // Compute a seed height that aims to be roughly twice the previous visual size,
+    // but allow it to shrink when there are many seeds so they still fit horizontally.
+    const computedHeight = Math.floor((lineWidth / Math.max(1, count)) * 0.9);
+    const seedHeight = Math.max(28, Math.min(80, computedHeight)); // enforce min height ~28px
+
+    // size the head proportionally (about twice the seed height)
+    head.style.height = `${Math.min(160, Math.max(40, Math.floor(seedHeight * 1.9)))}px`;
+    head.style.width = 'auto';
+    head.classList.remove('released');
+    head.classList.add('swaying');
+
+    for (let i = 0; i < count; i++) {
+      const img = document.createElement('img');
+      img.src = seedSrc;
+      img.alt = '';
+      img.className = 'seed';
+      // enforce a consistent height for all seeds so they line up; width auto preserves aspect ratio
+      img.style.height = `${seedHeight}px`;
+      img.style.width = 'auto';
+
+      // Slight rotation variance
+      const rot = (Math.random() * 10) - 5; // -20..+20deg
+      const verticalOffset = Math.random() * 8 - 4; // -2..+2px
+      img.style.marginTop = `${verticalOffset}px`;
+      img.style.transform = `rotate(${rot}deg)`;
+      seedLine.appendChild(img);
+    }
   });
 }
 

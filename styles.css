@@ -110,6 +110,54 @@ a {
   color: #0000cc;
 }
 
+
+/* Dandelion seed line for RSVP wishes */
+.seed-line {
+  display: flex; /* fill the width and keep seeds on a single horizontal line */
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  margin-left: 0;
+  margin-top: 6px;
+  align-items: center;
+}
+
+.seed-line img {
+  display: inline-block;
+  margin-right: -7px; /* pack seeds tighter */
+  pointer-events: none;
+  width: auto;
+}
+
+.attendee-info {
+  display: block; /* keep info on its own line above the seed row */
+}
+
+/* Seed head styling and animations */
+.seed-head {
+  display: inline-block;
+  margin-right: 6px;
+  pointer-events: none;
+  transition: transform 260ms ease, opacity 200ms ease;
+}
+
+.seed-head.swaying {
+  animation: seed-sway 1.6s ease-in-out infinite;
+}
+
+.seed-head.released {
+  animation: none;
+  transform: translateY(0) rotate(0deg);
+  opacity: 1;
+}
+
+@keyframes seed-sway {
+  0% { transform: translateY(0px) rotate(-4deg); }
+  40% { transform: translateY(-6px) rotate(2deg); }
+  70% { transform: translateY(-3px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(-4deg); }
+}
+
 .feature-table {
   background: #f5f5f5;
   margin: 12px 0;
