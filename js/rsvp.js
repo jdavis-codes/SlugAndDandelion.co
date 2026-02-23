@@ -212,9 +212,9 @@ async function refreshComments(supabase) {
       item.appendChild(seedLine);
       commentList.appendChild(item);
 
-      const lineWidth = Math.max(0, seedLine.getBoundingClientRect().width || item.clientWidth || 120);
-      const computedHeight = Math.floor((lineWidth / Math.max(1, caught)) * 0.1);
-      const seedHeight = Math.max(21, Math.min(80, computedHeight));
+      // const lineWidth = Math.max(0, seedLine.getBoundingClientRect().width || item.clientWidth || 120);
+      // const computedHeight = Math.floor((lineWidth / Math.max(1, caught)) * 0.1);
+      const seedHeight = 21;
 
       for (let i = 0; i < caught; i++) {
         const img = document.createElement('img');
