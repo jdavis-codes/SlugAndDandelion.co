@@ -4,7 +4,7 @@ create table if not exists public.rsvps (
   name text not null check (char_length(name) <= 80),
   email text,
   attending text not null check (attending in ('yes', 'no', 'maybe')),
-  guests int not null default 0 check (guests >= 0 and guests <= 8),
+  guests int not null default 0 check (guests >= 0 and guests <= 1),
   message text
 );
 
@@ -15,27 +15,142 @@ create table if not exists public.comments (
   comment text not null check (char_length(comment) <= 280)
 );
 
+create table if not exists public.site_counter (
+  id int primary key check (id = 1),
+  visitor_count bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+insert into public.site_counter (id, visitor_count)
+values (1, 0)
+on conflict (id) do nothing;
+
+create extension if not exists pgcrypto;
+
+create table if not exists public.portal_settings (
+  id int primary key check (id = 1),
+  password_hash text not null,
+  updated_at timestamptz not null default now()
+);
+
+insert into public.portal_settings (id, password_hash)
+values (1, extensions.crypt('change-me-now', extensions.gen_salt('bf')))
+on conflict (id) do nothing;
+
 alter table public.rsvps enable row level security;
 alter table public.comments enable row level security;
+alter table public.site_counter enable row level security;
+
+revoke all on public.portal_settings from public, anon, authenticated;
+revoke all on public.site_counter from public, anon, authenticated;
+
+create or replace function public.increment_site_counter()
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_count bigint;
+begin
+  update public.site_counter
+  set visitor_count = visitor_count + 1,
+      updated_at = now()
+  where id = 1
+  returning visitor_count into new_count;
+
+  return coalesce(new_count, 0);
+end;
+$$;
+
+create or replace function public.get_site_counter()
+returns bigint
+language sql
+security definer
+set search_path = public
+as $$
+  select coalesce(visitor_count, 0)
+  from public.site_counter
+  where id = 1;
+$$;
+
+revoke all on function public.increment_site_counter() from public;
+grant execute on function public.increment_site_counter() to anon, authenticated;
+revoke all on function public.get_site_counter() from public;
+grant execute on function public.get_site_counter() to anon, authenticated;
+
+create or replace function public.check_portal_key()
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  provided_password text;
+  stored_hash text;
+begin
+  provided_password := coalesce(
+    (current_setting('request.headers', true))::json ->> 'x-portal-password',
+    ''
+  );
+
+  select password_hash
+  into stored_hash
+  from public.portal_settings
+  where id = 1;
+
+  if stored_hash is null then
+    return false;
+  end if;
+
+  return extensions.crypt(provided_password, stored_hash) = stored_hash;
+end;
+$$;
+
+create or replace function public.set_portal_password(new_password text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new_password is null or char_length(trim(new_password)) < 8 then
+    raise exception 'Password must be at least 8 characters.';
+  end if;
+
+  insert into public.portal_settings (id, password_hash, updated_at)
+  values (1, extensions.crypt(trim(new_password), extensions.gen_salt('bf')), now())
+  on conflict (id)
+  do update
+    set password_hash = excluded.password_hash,
+        updated_at = now();
+end;
+$$;
+
+revoke all on function public.set_portal_password(text) from public, anon, authenticated;
 
 drop policy if exists "Public can read rsvps" on public.rsvps;
-create policy "Public can read rsvps"
+drop policy if exists "Protected read rsvps" on public.rsvps;
+create policy "Protected read rsvps"
 on public.rsvps for select
-using (true);
+using (public.check_portal_key());
 
 drop policy if exists "Public can insert rsvps" on public.rsvps;
-create policy "Public can insert rsvps"
+drop policy if exists "Protected insert rsvps" on public.rsvps;
+create policy "Protected insert rsvps"
 on public.rsvps for insert
 to anon
-with check (true);
+with check (public.check_portal_key());
 
 drop policy if exists "Public can read comments" on public.comments;
-create policy "Public can read comments"
+drop policy if exists "Protected read comments" on public.comments;
+create policy "Protected read comments"
 on public.comments for select
-using (true);
+using (public.check_portal_key());
 
 drop policy if exists "Public can insert comments" on public.comments;
-create policy "Public can insert comments"
+drop policy if exists "Protected insert comments" on public.comments;
+create policy "Protected insert comments"
 on public.comments for insert
 to anon
-with check (true);
+with check (public.check_portal_key());

@@ -7,6 +7,7 @@ Intentionally terrible 90s-corporate static website with an RSVP portal.
 - `index.html`: fake 90s corporate front page
 - `portal.html`: RSVP + attendee list + guestbook comments
 - `js/rsvp.js`: Supabase-powered insert/read logic
+- `js/counter.js`: live Supabase-backed visitor counter for homepage
 - `supabase/schema.sql`: tables + policies
 
 ## 1) Add your logo files
@@ -42,33 +43,22 @@ python3 -m http.server 8080
 
 Then open `http://localhost:8080`.
 
+## Existing projects: apply counter migration
+
+If your Supabase project was already set up before the visitor counter was added,
+run the updated `supabase/schema.sql` again so `site_counter` and its RPC functions
+(`increment_site_counter`, `get_site_counter`) are created.
+
 ## 4) Deploy for free fast
 
 ### Option A: Cloudflare Pages (recommended)
 
-1. **GitHub Setup**:
-   - Create a new GitHub repository.
-   - Run these commands in your project folder:
-     ```bash
-     git init
-     git add .
-     git commit -m "Initial commit"
-     git branch -M main
-     git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-     git push -u origin main
-     ```
-   - Note: `js/config.js` is ignored so your secrets won't be uploaded.
-
-2. **Cloudflare Pages Setup**:
-   - In Cloudflare Dashboard > Pages > **Create project** > Connect to Git.
-   - Select your new repository.
-   - **Build settings**:
-     - **Build command**: `./build.sh`
-     - **Build output directory**: `.` (leave as root)
-   - **Environment variables** (crucial step!):
-     - Add variable `SUPABASE_URL` with your project URL.
-     - Add variable `SUPABASE_ANON_KEY` with your anon key.
-   - Click **Save and Deploy**.
+1. Push this folder to a GitHub repo.
+2. In Cloudflare Pages: **Create project** → connect GitHub repo.
+3. Framework preset: **None**.
+4. Build command: *(leave empty)*.
+5. Build output directory: `/`.
+6. Deploy.
 
 ### Connect Porkbun domain
 

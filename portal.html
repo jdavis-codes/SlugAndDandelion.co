@@ -8,7 +8,23 @@
 </head>
 <body>
   <center>
-    <table class="page-shell" cellpadding="0" cellspacing="0" border="3">
+    <div id="login-gate" style="margin-top: 100px;">
+      <table class="page-shell" cellpadding="20" cellspacing="0" border="3" style="width: 400px;">
+        <tr>
+          <td align="center" class="content">
+            <h3>INTERNAL ACCESS REQUIRED</h3>
+            <p>Please enter the Corporate Jamboree Authorization Code:</p>
+            <form id="login-form" onsubmit="return false;">
+              <input type="password" id="portal-password" placeholder="Password" required style="width: 200px; margin-bottom: 10px;" /><br />
+              <button type="submit">Verify Identity</button>
+            </form>
+            <div id="login-error" style="color: red; margin-top: 10px; font-size: 12px;"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <table id="portal-content" class="page-shell" cellpadding="0" cellspacing="0" border="3" style="display: none;">
       <tr>
         <td>
           <table width="100%" class="header" cellpadding="8" cellspacing="0" border="0">
@@ -19,6 +35,11 @@
               </td>
             </tr>
           </table>
+
+          <div class="download-banner">
+            <strong>OFFICIAL EVENT DOCUMENTATION:</strong> 
+            <a href="assets/invite_defualt.pdf" download class="retro-btn-large">Download Invitation (PDF)</a>
+          </div>
 
           <table width="100%" cellpadding="10" cellspacing="0" border="0">
             <tr>
@@ -34,7 +55,7 @@
                       <option value="maybe">Maybe / TBD</option>
                     </select>
                   </label><br /><br />
-                  <label>Additional guests<br /><input type="number" name="guests" min="0" max="8" value="0" /></label><br /><br />
+                  <label>Additional guests<br /><input type="number" name="guests" min="0" max="1" value="0" /></label><br /><br />
                   <label>Message<br /><textarea name="message" rows="4" maxlength="240"></textarea></label><br /><br />
                   <button type="submit">Submit RSVP</button>
                   <div id="rsvp-status" class="status"></div>
@@ -68,7 +89,7 @@
           <table width="100%" class="footer" cellpadding="8" cellspacing="0" border="0">
             <tr>
               <td align="left"><a href="index.html">Return to Corporate Site</a></td>
-              <td align="right">S&amp;D Portal v1.0</td>
+              <td align="right"><a href="#" id="portal-logout">Log out</a> &nbsp;|&nbsp; S&amp;D Portal v1.0</td>
             </tr>
           </table>
         </td>

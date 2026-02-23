@@ -6,21 +6,86 @@ const attendeeList = document.getElementById("attendee-list");
 const commentList = document.getElementById("comment-list");
 const rsvpStatus = document.getElementById("rsvp-status");
 const commentStatus = document.getElementById("comment-status");
+const loginGate = document.getElementById("login-gate");
+const loginForm = document.getElementById("login-form");
+const loginError = document.getElementById("login-error");
+const portalContent = document.getElementById("portal-content");
+const logoutLink = document.getElementById("portal-logout");
 
 const cfg = window.SD_CONFIG || {};
+let supabase = null;
+let handlersWired = false;
 
-if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
-  rsvpStatus.textContent = "Set js/config.js with your Supabase URL + anon key.";
-  commentStatus.textContent = "Database connection not configured.";
-  attendeeList.innerHTML = "<li>Configuration needed.</li>";
-  commentList.innerHTML = "<li>Configuration needed.</li>";
-} else {
-  const supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-  wireHandlers(supabase);
-  refreshAll(supabase);
+if (logoutLink) {
+  logoutLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    sessionStorage.removeItem("sd_portal_pass");
+    window.location.reload();
+  });
+}
+
+// On load, check if we already have the password in session
+const savedPass = sessionStorage.getItem("sd_portal_pass");
+if (savedPass) {
+  initPortal(savedPass);
+}
+
+if (loginForm) {
+  loginForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const passInput = document.getElementById("portal-password");
+    const pass = passInput ? passInput.value : "";
+    initPortal(pass);
+  });
+}
+
+async function initPortal(pass) {
+  const normalizedPass = String(pass || "").trim();
+
+  if (!normalizedPass) {
+    if (loginError) loginError.textContent = "Enter the authorization code.";
+    return;
+  }
+
+  if (!cfg.supabaseUrl || !cfg.supabaseAnonKey) {
+    if (loginError) loginError.textContent = "Supabase config missing.";
+    return;
+  }
+
+  if (loginError) loginError.textContent = "Verifying...";
+
+  // Create client with the password in a custom header
+  supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+    global: {
+      headers: { "x-portal-password": normalizedPass }
+    }
+  });
+
+  // Verify the password by trying to fetch one row
+  const { error } = await supabase.from("rsvps").select("id").limit(1);
+  
+  if (error) {
+    if (loginError) loginError.textContent = "INVALID AUTHORIZATION CODE.";
+    sessionStorage.removeItem("sd_portal_pass");
+  } else {
+    // Success! Show content and save pass
+    sessionStorage.setItem("sd_portal_pass", normalizedPass);
+    if (loginGate) loginGate.style.display = "none";
+    if (portalContent) portalContent.style.display = "table";
+    if (loginError) loginError.textContent = "";
+    wireHandlers(supabase);
+    refreshAll(supabase);
+  }
 }
 
 function wireHandlers(supabase) {
+  if (handlersWired) return;
+  handlersWired = true;
+
+  if (!rsvpForm || !commentForm || !rsvpStatus || !commentStatus) {
+    return;
+  }
+
   rsvpForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     rsvpStatus.textContent = "Submitting RSVP...";
@@ -30,7 +95,7 @@ function wireHandlers(supabase) {
       name: String(formData.get("name") || "").trim(),
       email: normalizeOptional(formData.get("email")),
       attending: String(formData.get("attending") || "maybe"),
-      guests: Number(formData.get("guests") || 0),
+      guests: Math.min(Number(formData.get("guests") || 0), 1),
       message: normalizeOptional(formData.get("message"))
     };
 

@@ -222,6 +222,31 @@ button:active {
   z-index: 1;
 }
 
+.download-banner {
+  background: #ffff00;
+  border-top: 3px double #000;
+  border-bottom: 3px double #000;
+  padding: 12px;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+}
+
+.retro-btn-large {
+  display: inline-block;
+  margin-left: 15px;
+  padding: 8px 16px;
+  background: #000080;
+  color: #fff !important;
+  text-decoration: none;
+  font-weight: bold;
+  border: 3px outset #0000ff;
+}
+
+.retro-btn-large:active {
+  border-style: inset;
+}
+
 @keyframes blinker {
   50% {
     opacity: 0;
