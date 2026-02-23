@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>S&D Internal RSVP Portal</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <center>
+    <table class="page-shell" cellpadding="0" cellspacing="0" border="3">
+      <tr>
+        <td>
+          <table width="100%" class="header" cellpadding="8" cellspacing="0" border="0">
+            <tr>
+              <td>
+                <h1>S&amp;D INTERNAL COLLABORATION PORTAL</h1>
+                <div class="tagline">Authorized Team Access Only (Absolutely Not Party Related)</div>
+              </td>
+            </tr>
+          </table>
+
+          <table width="100%" cellpadding="10" cellspacing="0" border="0">
+            <tr>
+              <td valign="top" width="50%" class="content">
+                <h2>Event Attendance Form</h2>
+                <form id="rsvp-form">
+                  <label>Name<br /><input type="text" name="name" required maxlength="80" /></label><br /><br />
+                  <label>Email (optional)<br /><input type="email" name="email" maxlength="120" /></label><br /><br />
+                  <label>Attendance<br />
+                    <select name="attending" required>
+                      <option value="yes">Yes, attending</option>
+                      <option value="no">No, sadly cannot</option>
+                      <option value="maybe">Maybe / TBD</option>
+                    </select>
+                  </label><br /><br />
+                  <label>Additional guests<br /><input type="number" name="guests" min="0" max="8" value="0" /></label><br /><br />
+                  <label>Message<br /><textarea name="message" rows="4" maxlength="240"></textarea></label><br /><br />
+                  <button type="submit">Submit RSVP</button>
+                  <div id="rsvp-status" class="status"></div>
+                </form>
+
+                <hr />
+
+                <h2>Guestbook</h2>
+                <form id="comment-form">
+                  <label>Name<br /><input type="text" name="name" required maxlength="80" /></label><br /><br />
+                  <label>Comment<br /><textarea name="comment" rows="3" maxlength="280" required></textarea></label><br /><br />
+                  <button type="submit">Post Comment</button>
+                  <div id="comment-status" class="status"></div>
+                </form>
+              </td>
+
+              <td valign="top" class="sidebar">
+                <h3>Attendee List</h3>
+                <ul id="attendee-list" class="list-box">
+                  <li>Loading...</li>
+                </ul>
+
+                <h3>Comments</h3>
+                <ul id="comment-list" class="list-box">
+                  <li>Loading...</li>
+                </ul>
+              </td>
+            </tr>
+          </table>
+
+          <table width="100%" class="footer" cellpadding="8" cellspacing="0" border="0">
+            <tr>
+              <td align="left"><a href="index.html">Return to Corporate Site</a></td>
+              <td align="right">S&amp;D Portal v1.0</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </center>
+
+  <script src="js/config.js"></script>
+  <script type="module" src="js/rsvp.js"></script>
+  <script src="js/sluggy.js"></script>
+</body>
+</html>
