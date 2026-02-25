@@ -56,6 +56,11 @@ async function initPortal(pass) {
 
   // Create client with the password in a custom header
   supabase = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    },
     global: {
       headers: { "x-portal-password": normalizedPass }
     }

@@ -62,7 +62,7 @@
     },
     PETAL: {
       releaseVXRange: 0.01, // px per ms (horizontal velocity range magnitude)
-      releaseVYBase: -0.012, // px per ms (vertical velocity base upward)
+      releaseVYBase: -0.024, // px per ms (vertical velocity base upward)
       releaseVYExtra: 0.006, // px per ms (additional random vertical component)
       gravity: 0.0000015, // px per ms^2
       spinBase: -0.008, // degrees per ms
@@ -71,8 +71,8 @@
       DAMPING_FACTOR: 0.96 // multiplier for per-petal damping
     },
     CATCH: {
-      HIT_RADIUS: 30,
-      BOTTOM_BUFFER_PX: 120 // petals are catchable only when above (viewportHeight - BOTTOM_BUFFER_PX)
+      HIT_RADIUS: 10, // px (screen space)
+      BOTTOM_BUFFER_PX: 0 // petals are catchable only when above (garden-box top + BOTTOM_BUFFER_PX)
     }, // px (screen space)
     DEBUG: { SHOW_HITBOX: false } // show hit radius for detached petals
     ,
@@ -217,7 +217,9 @@
             if (!s.released || s.caught) continue;
             if (s.element.style.opacity === '0') continue;
             const center = getPetalCenterOnScreen(s.element);
-            const catchMaxY = window.innerHeight - CONFIG.CATCH.BOTTOM_BUFFER_PX;
+            const gardenBox = document.querySelector('#garden-box');
+            const gardenTop = gardenBox ? gardenBox.getBoundingClientRect().top : 0;
+            const catchMaxY = gardenTop + CONFIG.CATCH.BOTTOM_BUFFER_PX;
             if (center.y > catchMaxY) continue;
             const cx = center.x;
             const cy = center.y;
@@ -339,7 +341,9 @@
       if (state.element.style.opacity === '0') continue;
 
       const center = getPetalCenterOnScreen(state.element);
-      const catchMaxY = window.innerHeight - CONFIG.CATCH.BOTTOM_BUFFER_PX;
+      const gardenBox = document.querySelector('#garden-box');
+      const gardenTop = gardenBox ? gardenBox.getBoundingClientRect().top : 0;
+      const catchMaxY = gardenTop + CONFIG.CATCH.BOTTOM_BUFFER_PX;
       if (center.y > catchMaxY) continue;
       const dist = Math.hypot(center.x - clientX, center.y - clientY);
       if (dist < nearestDist) {

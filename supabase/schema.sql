@@ -140,7 +140,7 @@ drop policy if exists "Public can insert rsvps" on public.rsvps;
 drop policy if exists "Protected insert rsvps" on public.rsvps;
 create policy "Protected insert rsvps"
 on public.rsvps for insert
-to anon
+to anon, authenticated
 with check (public.check_portal_key());
 
 drop policy if exists "Public can read comments" on public.comments;
@@ -153,7 +153,7 @@ drop policy if exists "Public can insert comments" on public.comments;
 drop policy if exists "Protected insert comments" on public.comments;
 create policy "Protected insert comments"
 on public.comments for insert
-to anon
+to anon, authenticated
 with check (public.check_portal_key());
 
 -- ============================================================
