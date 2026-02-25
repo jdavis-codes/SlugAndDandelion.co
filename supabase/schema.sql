@@ -5,7 +5,8 @@ create table if not exists public.rsvps (
   email text,
   attending text not null check (attending in ('yes', 'no', 'maybe')),
   guests int not null default 0 check (guests >= 0 and guests <= 1),
-  message text
+  message text,
+  private_message text check (private_message is null or char_length(private_message) <= 500)
   , wishes int not null default 0
 );
 
@@ -176,6 +177,9 @@ end $$;
 alter table public.rsvps
   add column if not exists wishes_released int not null default 0 check (wishes_released >= 0),
   add column if not exists wishes_caught   int not null default 0 check (wishes_caught   >= 0);
+
+alter table public.rsvps
+  add column if not exists private_message text check (private_message is null or char_length(private_message) <= 500);
 
 -- Comments: add both wish-tracking columns
 alter table public.comments

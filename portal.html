@@ -72,6 +72,7 @@
                   </label><br /><br />
                   <label>Additional guests<br /><input type="number" name="guests" min="0" max="1" value="0" /></label><br /><br />
                   <label>Message<br /><textarea name="message" rows="4" maxlength="240"></textarea></label><br /><br />
+                  <label>Private message to hosts<br /><textarea name="private_message" rows="3" maxlength="1000"></textarea></label><br /><br />
                   <button type="submit">Submit RSVP</button>
                   <div id="rsvp-status" class="status"></div>
                 </form>
@@ -79,7 +80,7 @@
                 <hr />
 
                 <h2>Guestbook</h2>
-                <p style="font-size:11px;margin:0 0 8px 0;">Caught wishes are shown as seeds — sorted by most caught.</p>
+                <!-- <p style="font-size:11px;margin:0 0 8px 0;">Caught wishes are shown as seeds — sorted by most caught.</p> -->
                 <form id="comment-form">
                   <label>Name<br /><input type="text" name="name" required maxlength="80" /></label><br /><br />
                   <label>Comment<br /><textarea name="comment" rows="3" maxlength="280" required></textarea></label><br /><br />

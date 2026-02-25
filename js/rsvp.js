@@ -101,7 +101,8 @@ function wireHandlers(supabase) {
       email: normalizeOptional(formData.get("email")),
       attending: String(formData.get("attending") || "maybe"),
       guests: Math.min(Number(formData.get("guests") || 0), 1),
-      message: normalizeOptional(formData.get("message"))
+      message: normalizeOptional(formData.get("message")),
+      private_message: normalizeOptional(formData.get("private_message"))
     };
     // Include wishes released (total petals blown) and caught this session
     try {
