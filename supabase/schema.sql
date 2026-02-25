@@ -178,6 +178,13 @@ alter table public.rsvps
   add column if not exists wishes_released int not null default 0 check (wishes_released >= 0),
   add column if not exists wishes_caught   int not null default 0 check (wishes_caught   >= 0);
 
+update public.rsvps
+set email = null
+where trim(coalesce(email, '')) = '';
+
+alter table public.rsvps
+  alter column email drop not null;
+
 alter table public.rsvps
   add column if not exists private_message text check (private_message is null or char_length(private_message) <= 500);
 

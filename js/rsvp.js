@@ -157,6 +157,7 @@ async function refreshAttendees(supabase) {
   const { data, error } = await supabase
     .from("rsvps")
     .select("name, attending, guests, message, wishes_released, wishes_caught")
+    .in("attending", ["yes", "maybe"])
     .order("created_at", { ascending: false })
     .limit(100);
 
