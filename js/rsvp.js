@@ -66,10 +66,10 @@ async function initPortal(pass) {
     }
   });
 
-  // Verify the password by trying to fetch one row
-  const { error } = await supabase.from("rsvps").select("id").limit(1);
+  // Verify the password by calling the check_portal_key RPC
+  const { data: isValid, error } = await supabase.rpc("check_portal_key");
   
-  if (error) {
+  if (error || !isValid) {
     if (loginError) loginError.textContent = "INVALID AUTHORIZATION CODE.";
     sessionStorage.removeItem("sd_portal_pass");
   } else {
