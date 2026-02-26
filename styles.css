@@ -429,3 +429,79 @@ button:active {
     opacity: 0;
   }
 }
+
+.employee-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  background: #f5f5f5;
+  border: 2px solid #000;
+  margin: 12px 0;
+  font-size: 9pt;
+}
+
+.employee-card {
+  box-sizing: border-box;
+  text-align: center;
+  padding: 12px;
+  border-right: 1px solid #000;
+  border-bottom: 1px solid #000;
+  background: #fff;
+}
+
+.employee-card:last-child {
+  border-right: none;
+}
+
+.employee-card:nth-child(2n) {
+  border-right: none;
+}
+
+@media (max-width: 600px) {
+  .employee-grid {
+    grid-template-columns: 1fr;
+  }
+  .employee-card {
+    border-right: none;
+    border-bottom: 1px solid #000;
+  }
+  .employee-card:last-child {
+    border-bottom: none;
+  }
+}
+
+.employee-photo {
+  display: block;
+  margin: 6px auto 8px;
+  max-width: 160px;
+  width: 100%;
+  height: auto;
+  border: 2px inset #bbb;
+  transition: opacity 180ms ease, transform 200ms ease;
+}
+
+.employee-card h3 {
+  margin: 6px 0 4px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+.employee-card .years {
+  font-size: 12px;
+  font-style: italic;
+  color: #333;
+  margin-top: 6px;
+}
+
+@media (max-width: 600px) {
+  .employee-grid {
+    flex-direction: column;
+  }
+  .employee-card {
+    border-right: none;
+    border-bottom: 1px solid #000;
+  }
+  .employee-card:last-child {
+    border-bottom: none;
+  }
+}
