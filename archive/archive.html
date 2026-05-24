@@ -57,7 +57,7 @@
       gap: 14px;
     }
 
-    .archive-card a {
+    .archive-card > a {
       display: block;
       border: 2px solid #333;
       border-radius: 4px;
@@ -66,13 +66,13 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
 
-    .archive-card a:hover {
+    .archive-card > a:hover {
       border-color: #fff;
       transform: translateY(-4px);
       box-shadow: 0 8px 30px rgba(255,255,255,0.08);
     }
 
-    .archive-card a img {
+    .archive-card > a img {
       display: block;
       width: 100%;
       height: auto;
@@ -80,7 +80,7 @@
       transition: filter 0.2s;
     }
 
-    .archive-card a:hover img {
+    .archive-card > a:hover img {
       filter: saturate(1);
     }
 
@@ -146,7 +146,7 @@
       <div class="meta">
         <div class="label">March 2026</div>
         <div class="title">Slug &amp; Dandelion Enterprises Ltd</div>
-        <p class="visit" href="archive_assets/GUESTBOOK-3-21-26-1.pdf" target="_blank">Guestbook &rarr;</p>
+        <a class="visit" href="archive_assets/GUESTBOOK-3-21-26-1.pdf" target="_blank">Guestbook &rarr;</a>
       </div>
     </div>
 

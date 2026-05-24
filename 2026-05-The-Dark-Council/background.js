@@ -12,6 +12,7 @@ const fsSource = `
   precision highp float;
   uniform vec2 u_resolution;
   uniform float u_time;
+  uniform vec2 u_mouse;
 
   vec3 hash3(vec2 p) {
     vec3 q = vec3(dot(p, vec2(127.1, 311.7)), 
@@ -50,7 +51,7 @@ const fsSource = `
     return f;
   }
 
-  vec2 voronoi(vec2 x) {
+  vec2 voronoi(vec2 x, vec2 mw) {
     vec2 n = floor(x);
     vec2 f = fract(x);
     
@@ -70,7 +71,10 @@ const fsSource = `
         vec2 r = g + o - f;
         
         // Manhattan distance
-        float d = abs(r.x) + abs(r.y);
+        // float d = abs(r.x) + abs(r.y);
+        
+        // euclidain distance (uncomment if you want more circular cells, but it will be more expensive)
+        float d = length(r);
         
         // Subtracting weight makes the cell effectively reach further (larger droplet)
         d += weight * 15.1; // 0.7 gives a solid variance in sizing
@@ -83,6 +87,17 @@ const fsSource = `
         }
       }
     }
+    
+    // Inject the mouse point with a negative weight to create a large clear cell
+    float dMouse = abs(mw.x - x.x) + abs(mw.y - x.y) + 0.0; // Subtracting effectively expands the cell
+    
+    if (dMouse < mF1) {
+      mF2 = mF1;
+      mF1 = dMouse;
+    } else if (dMouse < mF2) {
+      mF2 = dMouse;
+    }
+    
     return vec2(mF1, mF2);
   }
 
@@ -90,13 +105,27 @@ const fsSource = `
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
     uv.y *= u_resolution.y / u_resolution.x;
     
-    vec2 p = uv * 6.0;
+    // Domain warping configuration
+    float zoomScale = 15.0;
+    float timeScaleX = 0.1;
+    float timeScaleY = 0.05;
+    vec2 phaseOffset = vec2(5.2, 1.3);
+    float distortion = 2.0;
+
+    vec2 p = uv * zoomScale;
     
     // Domain warping with fbm
-    vec2 q = vec2(fbm(p + u_time * 0.1), fbm(p + vec2(5.2, 1.3) - u_time * 0.05));
-    vec2 warped = p + 2.0 * q;
+    vec2 q = vec2(fbm(p + u_time * timeScaleX), fbm(p + phaseOffset - u_time * timeScaleY));
+    vec2 warped = p + distortion * q;
     
-    vec2 v = voronoi(warped);
+    // Calculate mouse point in warped space
+    vec2 mouse_uv = u_mouse / u_resolution.xy;
+    mouse_uv.y *= u_resolution.y / u_resolution.x;
+    vec2 mp = mouse_uv * zoomScale;
+    vec2 mq = vec2(fbm(mp + u_time * timeScaleX), fbm(mp + phaseOffset - u_time * timeScaleY));
+    vec2 mouse_warped = mp + distortion * mq;
+    
+    vec2 v = voronoi(warped, mouse_warped);
     
     // Use difference for edges to get cells
     float val = v.y - v.x;
@@ -157,6 +186,15 @@ gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
 const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
 const timeLocation = gl.getUniformLocation(program, "u_time");
+const mouseLocation = gl.getUniformLocation(program, "u_mouse");
+
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
+
+window.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
 
 function resize() {
   canvas.width = window.innerWidth;
@@ -169,6 +207,7 @@ resize();
 
 function render(time) {
   gl.uniform1f(timeLocation, time * 0.001);
+  gl.uniform2f(mouseLocation, mouseX, canvas.height - mouseY);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
   requestAnimationFrame(render);
 }

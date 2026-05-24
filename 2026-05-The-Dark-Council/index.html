@@ -1,74 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Dark Council</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
-  <style>
-    #bg-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: -1;
-      pointer-events: none;
-    }
 
-    @font-face {
-      font-family: "Devils Haircut";
-      src: url("assets/PintassilgoPrints-Devils-Haircut-Regular.otf") format("opentype");
-      font-weight: normal;
-      font-style: normal;
-    }
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+        <title>The Dark Council</title>
+        <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+        <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap"
+          rel="stylesheet">
+        <style>
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+        }
 
-    body {
-      margin: 0;
-      background: #2f2038; /* deep dark purple */
-      color: #ccc;
-      font-family: "Devils Haircut", "Courier New", monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      gap: 1.5rem;
-    }
-    h1 { color: #fff; letter-spacing: 0.1em; margin: 0; width: 80vw; text-align: center; font-size:8em; }
-    h2 { margin: 0; color: #aaa; font-size: 2em; }
-    p  { margin: 0; color: #666; font-size: 0.85rem; }
-    a  {
-      font-family: "Special Elite", "Courier New", monospace;
-      color: #888;
-      /* font-size: 0.75rem; */
-      letter-spacing: 0.12em;
-      text-transform: none;
-      text-decoration: none;
-      /* border-bottom: 1px solid #333; */
-      transition: color 0.15s, border-color 0.15s;
-    }
-    a:hover { color: #fff; border-color: #fff; }
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      padding: 0.5rem 0.5rem;
-      text-transform: uppercase;
-      background: rgba(0, 0, 0, 0.5);
-    }
-  </style>
-</head>
-<body>
-  <canvas id="bg-canvas"></canvas>
-  <h1>The Dark Council</h1>
-  <h2>Coming soon...</h2>
-  <footer>
-  <a href="../archive/archive.html">Site Archive &rarr;</a>
-  </footer>
-  <script src="background.js"></script>
-</body>
+        @font-face {
+            font-family: "Devils Haircut";
+            src: url("assets/PintassilgoPrints-Devils-Haircut-Regular.otf") format("opentype");
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        body {
+            margin: 0;
+            background: #2f2038;
+            /* deep dark purple */
+            color: #ccc;
+            font-family: "Devils Haircut", "Courier New", monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 1.5rem;
+        }
+
+        h1 {
+            color: #fff;
+            letter-spacing: 0.1em;
+            margin: 0;
+            width: 80vw;
+            text-align: center;
+            font-size: 8em;
+            transition: opacity 0.5s ease;
+        }
+
+        h2 {
+            margin: 0;
+            color: #aaa;
+            font-size: 2em;
+            transition: opacity 0.5s ease;
+        }
+
+        p {
+            margin: 0;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        a {
+            font-family: "Special Elite", "Courier New", monospace;
+            color: #888;
+            /* font-size: 0.75rem; */
+            letter-spacing: 0.12em;
+            text-transform: none;
+            text-decoration: none;
+            /* border-bottom: 1px solid #333; */
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        a:hover {
+            color: #fff;
+            border-color: #fff;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 0.5rem 0.5rem;
+            text-transform: uppercase;
+            background: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.5s ease;
+        }
+
+        #movable-key {
+            position: absolute;
+            top: 50px;
+            left: 50vw;
+            width: 120px;
+            cursor: grab;
+            z-index: 10;
+            user-select: none;
+            transform-origin: 50% 10%;
+            /* Optional drop shadow to make it pop slightly against the background */
+            filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
+            transition: filter 0.2s;
+        }
+
+        #movable-key:active {
+            cursor: grabbing;
+        }
+
+        #movable-key:hover {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+        }
+
+        #keyhole {
+            position: absolute;
+            top: 80vh;
+            left: 50vw;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            /* Adjust width as needed */
+            z-index: 5;
+            opacity: 0.9;
+            filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
+            transition: transform 0.5s ease;
+        }
+
+        body.grabbing-mode h1,
+        body.grabbing-mode h2,
+        body.grabbing-mode footer {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.grabbing-mode #keyhole {
+            transform: translate(-50%, -50%) scale(1.5);
+        }
+        </style>
+
+    </head>
+
+    <body>
+        <canvas id="bg-canvas"></canvas>
+        <h1>The Dark Council</h1>
+        <!-- <h2>Coming soon...</h2> -->
+        <img src="assets/keyhole.svg"
+          id="keyhole"
+          alt="Keyhole">    
+        <img src="assets/key.svg"
+          id="movable-key"
+          alt="Mysterious Key"
+          draggable="false">
+        <footer>
+            <a href="../archive/archive.html">Site Archive &rarr;</a>
+        </footer>
+        <script src="background.js"></script>
+        <script src="interaction.js"></script>
+
+    </body>
+
 </html>
