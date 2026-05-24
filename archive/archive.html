@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S&D Site Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #111;
+      color: #e0e0e0;
+      font-family: "Special Elite", "Courier New", monospace;
+      min-height: 100vh;
+      padding: 60px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    header p {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #888;
+      letter-spacing: 0.1em;
+    }
+
+    .archive-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .archive-card {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .archive-card a {
+      display: block;
+      border: 2px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .archive-card a:hover {
+      border-color: #fff;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(255,255,255,0.08);
+    }
+
+    .archive-card a img {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: saturate(0.85);
+      transition: filter 0.2s;
+    }
+
+    .archive-card a:hover img {
+      filter: saturate(1);
+    }
+
+    .archive-card .meta {
+      padding: 0 2px;
+    }
+
+    .archive-card .meta .label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #555;
+    }
+
+    .archive-card .meta .title {
+      font-size: 1rem;
+      color: #ddd;
+      margin-top: 4px;
+    }
+
+    .archive-card .meta .visit {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #888;
+      text-decoration: none;
+      border-bottom: 1px solid #444;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .archive-card .meta .visit:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 80px;
+      font-size: 0.75rem;
+      color: #444;
+      letter-spacing: 0.1em;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>S&amp;D Archive</h1>
+  </header>
+
+  <div class="archive-grid">
+
+    <div class="archive-card">
+      <a href="2026-03-Slug-&-Dandelion-Enterprises/index.html" title="View the March 2026 site">
+        <img
+          src="archive_assets/2026-03-Slug-&-Dandelion-Enterprises.png"
+          alt="Screenshot of the Slug &amp; Dandelion Enterprises site, March 2026"
+          width="320"
+        >
+      </a>
+      <div class="meta">
+        <div class="label">March 2026</div>
+        <div class="title">Slug &amp; Dandelion Enterprises Ltd</div>
+        <a class="visit" href="archive_assets/GUESTBOOK-3-21-26-1.pdf" target="_blank">Guestbook &rarr;</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- <footer>
+    &copy; 1998&ndash;2026 Slug &amp; Dandelion Enterprises LTD
+  </footer> -->
+
+</body>
+</html>

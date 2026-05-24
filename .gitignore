@@ -1,3 +1,4 @@
 .DS_Store
-js/config.js
-assets/invite.svg
+**/js/config.js
+**/assets/invite.svg
+**/ilustrator assets/*

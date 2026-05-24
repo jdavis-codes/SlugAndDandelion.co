@@ -49,9 +49,9 @@ If your Supabase project was already set up before the visitor counter was added
 run the updated `supabase/schema.sql` again so `site_counter` and its RPC functions
 (`increment_site_counter`, `get_site_counter`) are created.
 
-## 4) Deploy for free fast
+## 4) Deploy
 
-### Option A: Cloudflare Pages (recommended)
+### Cloudflare Pages
 
 1. Push this folder to a GitHub repo.
 2. In Cloudflare Pages: **Create project** → connect GitHub repo.
@@ -67,12 +67,3 @@ run the updated `supabase/schema.sql` again so `site_counter` and its RPC functi
 3. In Porkbun DNS, create/update records as Cloudflare shows.
 4. Wait for DNS propagation.
 
-### Option B: Netlify
-
-Drag-and-drop deploy this folder, then connect your custom domain in Netlify settings.
-
-## RSVP link location
-
-The RSVP portal is linked as `Company Jamboree` in the homepage sidebar navigation.
-
-A tiny footer dot also still links to the same portal as a backup shortcut.
