@@ -116,7 +116,7 @@
             vec2 o = hash2(n + g);
             
             // Slow animation
-            o = 0.5 + 0.5 * sin(u_time * 0.2 + 6.2831 * o);
+            o = 0.5 + 0.5 * sin(u_time * 0.01 + 6.2831 * o);
             vec2 r = g + o - f;
             
             // Manhattan distance
