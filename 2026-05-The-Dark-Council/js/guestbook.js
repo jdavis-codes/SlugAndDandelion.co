@@ -36,7 +36,7 @@ async function loadComments() {
   commentList.innerHTML = "";
   data.forEach(row => {
     const li = document.createElement("li");
-    li.innerHTML = `<span class="comment-name">${escapeHtml(row.name)}:</span> ${escapeHtml(row.comment)}`;
+    li.innerHTML = `<span class="comment-name engraved-text">${escapeHtml(row.name)}:</span> <span class="comment-body engraved-text">${escapeHtml(row.comment)}</span>`;
     commentList.appendChild(li);
   });
 }
@@ -72,7 +72,7 @@ if (commentForm) {
       if (commentStatus) commentStatus.textContent = `Error: ${error.message}`;
     } else {
       commentForm.reset();
-      if (commentStatus) commentStatus.textContent = "Entered into the tome.";
+      if (commentStatus) commentStatus.textContent = "Engraved for all time...";
       await loadComments();
     }
   });

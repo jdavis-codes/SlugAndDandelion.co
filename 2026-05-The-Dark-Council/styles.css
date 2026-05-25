@@ -381,7 +381,7 @@ body.guestbook-page .comment-status {
 body.rsvp-page .attendee-list,
 body.guestbook-page .comment-list {
 	list-style: none;
-	margin: 0;
+	margin: 0 10px 0 10px;
 	padding: 0;
 	overflow-y: auto;
 	flex: 1;
@@ -405,9 +405,55 @@ body.guestbook-page .comment-list li:last-child {
 	border-bottom: none;
 }
 
-body.guestbook-page .comment-name {
-	font-weight: bold;
-	color: #bbb;
+body.guestbook-page #ledger-box {
+	background-color: transparent;
+	background-image: url('assets/rock.png');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	border: none;
+	box-shadow: none;
+	max-height: 240px;
+	overflow: hidden;
+}
+
+body.guestbook-page #ledger-box .comment-list {
+	padding-bottom: 20px;
+	-webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent 100%);
+	mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent 100%);
+}
+
+body.guestbook-page #ledger-box .comment-list li {
+	position: relative;
+	border-bottom: none;
+	padding: 0.35rem 0;
+	color: #2f2f2f;
+}
+
+body.guestbook-page #ledger-box .comment-list li::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 1px;
+	background: linear-gradient(180deg, #3d3a36 0%, #171615 100%);
+	box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+body.guestbook-page #ledger-box .comment-list li:last-child::after {
+	display: none;
+}
+
+body.guestbook-page .engraved-text {
+	display: inline-block;
+	font-weight: 400;
+	color: transparent;
+	background-image: linear-gradient(180deg, #3d3a36 0%, #171615 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	text-shadow: 0.65px 1.1px 0.9px rgba(255, 255, 255, 0.28);
 }
 
 body.rsvp-page .guestbook-btn-wrap,
