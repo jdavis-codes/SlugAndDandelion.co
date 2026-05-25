@@ -41,7 +41,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
             gap: 1.5rem;
         }
 
@@ -60,7 +62,7 @@
 
         @media (max-width: 600px) {
             h1 {
-                font-size: 7rem;
+                font-size: min(20vw, 12vh);
             }
         }
 
@@ -123,7 +125,7 @@
 
         @media (max-width: 600px) {
             #movable-key {
-                top: 80px;
+                top: 10dvh;
                 right: auto;
                 left: calc(50vw - 60px);
                 z-index: 3;
@@ -156,11 +158,11 @@
 
         @media (max-width: 600px) {
             #keyhole {
-                top: 85vh;
-                width: 100px;
+                top: 78dvh;
+                width: max(80px, 15dvh);
             }
             body.grabbing-mode #keyhole {
-                top: 55vh;
+                top: 55dvh;
                 transform: translate(-50%, -50%) scale(1.2);
             }
         }
@@ -199,7 +201,7 @@
           alt="Mysterious Key"
           draggable="false">
         <footer>
-            <a href="../archive/archive.html">Site Archive &rarr;</a>
+            <a href="../archive/archive.html">Archive &rarr;</a>
         </footer>
         <script src="background.js"></script>
         <script src="interaction.js"></script>

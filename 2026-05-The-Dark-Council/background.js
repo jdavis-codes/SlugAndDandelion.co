@@ -111,8 +111,11 @@ const fsSource = `
     
     vec2 holeUV = vec2(u_keyholePos.x, u_keyholePos.y * u_resolution.y / u_resolution.x);
     
+    // Decrease base zoom scale on narrower screens so cells don't appear too small on mobile
+    float baseZoom = u_resolution.x < 768.0 ? 8.0 : 15.0;
+
     // Domain warping configuration: zoom in extremely far and crank distortion as transition increases
-    float zoomScale = mix(15.0, 1.0, u_transition);
+    float zoomScale = mix(baseZoom, 1.0, u_transition);
     float timeScaleX = 0.1;
     float timeScaleY = 0.05;
     vec2 phaseOffset = vec2(5.2, 1.3);
