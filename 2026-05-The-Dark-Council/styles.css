@@ -210,12 +210,14 @@ body.guestbook-page .eye-widget {
 	position: relative;
 	width: 400px;
 	height: 250px;
+    flex-shrink: 0;
+    transform: translateY(-5%);
 }
 
 @media (min-width: 601px) {
 	body.rsvp-page .eye-widget,
 	body.guestbook-page .eye-widget {
-		width: 550px;
+		width: 650px;
 		height: 300px;
 	}
 }
@@ -319,12 +321,29 @@ body.guestbook-page .form-box textarea {
 	border: 1px solid #555;
 	color: #d8d8d8;
 	font-family: inherit;
-	padding: 0.25rem 0.3rem;
+	padding: 0.4rem 0.55rem;
 	border-radius: 4px;
 	margin-top: 0.15rem;
 	width: 100%;
 	box-sizing: border-box;
-	font-size: 1em;
+	font-size: 16px;
+	line-height: 1.2;
+	min-height: 2.25rem;
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+body.rsvp-page .form-box select,
+body.guestbook-page .form-box select {
+	background-image:
+		linear-gradient(45deg, transparent 50%, #d8d8d8 50%),
+		linear-gradient(135deg, #d8d8d8 50%, transparent 50%);
+	background-position:
+		calc(100% - 14px) 50%,
+		calc(100% - 9px) 50%;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat;
+	padding-right: 1.9rem;
 }
 
 body.rsvp-page .form-box button[type="submit"],
@@ -338,6 +357,8 @@ body.guestbook-page .form-box button[type="submit"] {
 	border-radius: 4px;
 	margin-top: auto;
 	transition: background 0.2s;
+	font-size: 16px;
+	line-height: 1.2;
 }
 
 body.rsvp-page .form-box button[type="submit"]:hover,
@@ -396,7 +417,7 @@ body.guestbook-page .back-btn-wrap {
 body.rsvp-page .guestbook-btn,
 body.guestbook-page .back-btn {
 	display: block;
-	width: 100%;
+	/* width: 100%; */
 	padding: 0.5rem;
 	background: rgba(0, 0, 0, 0.6);
 	border: 1px solid #444;
@@ -444,17 +465,33 @@ body.guestbook-page .back-btn:hover {
 		transform: translate(-50%, -50%) scale(1.2);
 	}
 
+	body.rsvp-page .content,
+	body.guestbook-page .content {
+		min-height: 100dvh;
+		height: 100dvh;
+		justify-content: flex-start;
+		overflow: hidden;
+	}
+
+
+
 	body.rsvp-page .forms-container,
 	body.guestbook-page .forms-container {
 		flex-direction: column;
 		gap: 0.35rem;
 		padding: 0 0.4rem;
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	body.rsvp-page .form-box,
 	body.guestbook-page .form-box {
 		padding: 0.4rem;
-		font-size: 0.72em;
+		font-size: 0.82em;
 	}
 
 	body.rsvp-page .form-row label.narrow {
