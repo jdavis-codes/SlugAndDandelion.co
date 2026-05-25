@@ -96,6 +96,7 @@ function initEye() {
     
     // Track mouse
     document.addEventListener('mousemove', onDocumentMouseMove, false);
+    document.addEventListener('touchmove', onDocumentTouchMove, { passive: false });
 
     animate();
 }
@@ -106,6 +107,20 @@ let targetX = 0;
 let targetY = 0;
 let twitchX = 0;
 let twitchY = 0;
+
+function onDocumentTouchMove(event) {
+    event.preventDefault(); // Prevent page scroll
+    const touch = event.touches[0];
+    if (!touch) return;
+    const windowHalfX = window.innerWidth / 2;
+    const windowHalfY = window.innerHeight / 2;
+    const normalizedX = (touch.clientX - windowHalfX) / windowHalfX;
+    const normalizedY = (touch.clientY - windowHalfY) / windowHalfY;
+    const maxRotY = 0.3;
+    const maxRotX = 0.15;
+    mouseX = normalizedX * maxRotY;
+    mouseY = normalizedY * maxRotX;
+}
 
 function onDocumentMouseMove(event) {
     const windowHalfX = window.innerWidth / 2;
