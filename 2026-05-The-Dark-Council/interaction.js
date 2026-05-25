@@ -85,6 +85,7 @@ function dragStart(e) {
   if (e.target === keyEl) {
     isDragging = true;
     keyEl.style.cursor = 'grabbing';
+    keyEl.classList.add('grabbed');
     document.body.classList.add('grabbing-mode');
   }
 }
@@ -126,6 +127,7 @@ function dragEnd() {
   isDragging = false;
   insertTarget = 0;
   keyEl.style.cursor = 'grab';
+  keyEl.classList.remove('grabbed');
   document.body.classList.remove('grabbing-mode');
   if (keyholeEl) keyholeEl.style.filter = "drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5))";
 }
