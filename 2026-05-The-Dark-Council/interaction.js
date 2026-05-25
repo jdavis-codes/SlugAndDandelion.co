@@ -43,6 +43,7 @@ let frontRotation = 0;
 
 let transitioning = false;
 let transitionStartTime = null;
+let hasRedirected = false;
 const TRANSITION_DURATION = 3000; // ms — page transition duration
 
 const HOLD_BEFORE_UNLOCK = 1800; // ms — hold fully inserted before turning starts
@@ -202,7 +203,10 @@ function animateFrontProxy() {
       window.bgSetTransition(eased);
     }
     if (p >= 1) {
-      window.location.href = 'rsvp.html';
+      if (!hasRedirected) {
+        hasRedirected = true;
+        window.location.href = 'rsvp.html';
+      }
       return; // prevent further frames
     }
   }
