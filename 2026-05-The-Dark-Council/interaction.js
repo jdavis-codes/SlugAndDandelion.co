@@ -76,7 +76,7 @@ function dragEnd() {
   if (keyholeEl) keyholeEl.style.filter = "drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5))";
 }
 
-function animate() {
+function animateKey() {
   // Spring physics constants
   const stiffness = 0.06;
   const damping = 0.85;
@@ -91,7 +91,11 @@ function animate() {
   rotation += rotationVelocity;
 
   keyEl.style.transform = `translate3d(${xOffset}px, ${yOffset}px, 0) rotate(${rotation}deg)`;
-  
+}
+
+let pulsePhase = 0;
+
+function animateKeyhole() {
   if (isDragging && keyholeEl) {
     const keyRect = keyEl.getBoundingClientRect();
     const holeRect = keyholeEl.getBoundingClientRect();
@@ -105,14 +109,26 @@ function animate() {
     const maxDist = Math.hypot(window.innerWidth, window.innerHeight) * 0.4;
     
     const intensity = Math.max(0, 1 - (dist / maxDist));
-    const pulse = 0.8 + 0.2 * Math.sin(Date.now() * 0.005);
+    
+    // Accumulate phase incrementally. 
+    // If you multiply time * frequency where frequency varies, you get massive phase jumps.
+    // By adding a small delta each frame, the frequency scales smoothly.
+    const baseSpeed = 0.05;
+    const speedRamp = 0.25;
+    pulsePhase += baseSpeed + (speedRamp * intensity);
+    
+    const pulse = 0.8 + 0.2 * Math.sin(pulsePhase);
     
     const spread = 10 + 60 * intensity * pulse;
     const alpha = 0.4 + 0.6 * intensity * pulse;
     
     keyholeEl.style.filter = `drop-shadow(0 0 ${spread}px rgba(255, 230, 255, ${alpha})) drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5))`;
   }
+}
 
+function animate() {
+  animateKey();
+  animateKeyhole();
   requestAnimationFrame(animate);
 }
 
