@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.0"
+   width="48.421558pt"
+   height="239.55093pt"
+   viewBox="0 0 48.421559 239.55093"
+   preserveAspectRatio="xMidYMid"
+   id="svg15"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs15" />
+  <g
+     id="g4"
+     transform="rotate(90,514.8748,615.92262)">
+    <g
+       id="g5">
+      <rect
+         style="fill:#010101;fill-opacity:1;stroke:none;stroke-width:1.44;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+         id="rect2-4"
+         width="100.771"
+         height="27.058876"
+         x="30.553823"
+         y="1092.7679"
+         ry="3.7736764"
+         rx="3.7736764"
+         transform="translate(4.0000002e-6,-2.1e-5)" />
+      <circle
+         style="fill:#212121;fill-opacity:1;stroke:none;stroke-width:1.44;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+         id="path1-0"
+         cx="18.727608"
+         cy="1106.5867"
+         r="24.210777"
+         transform="translate(4.0000002e-6,-2.1e-5)" />
+      <rect
+         style="fill:#31312e;fill-opacity:1;stroke:none;stroke-width:1.44;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+         id="rect3-6-6"
+         width="239.55087"
+         height="14.929037"
+         x="-101.04783"
+         y="1099.1222"
+         ry="4.3542418"
+         rx="4.3542418" />
+    </g>
+  </g>
+</svg>

@@ -13,6 +13,10 @@ const fsSource = `
   uniform vec2 u_resolution;
   uniform float u_time;
   uniform vec2 u_mouse;
+  uniform vec2 u_keyholePos;    // normalized screen coords, y flipped for GL
+  uniform float u_wavePhase;    // advances over time during unlock
+  uniform float u_waveIntensity; // 0 = off, 1 = full
+  uniform float u_transition;
 
   vec3 hash3(vec2 p) {
     vec3 q = vec3(dot(p, vec2(127.1, 311.7)), 
@@ -105,33 +109,33 @@ const fsSource = `
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
     uv.y *= u_resolution.y / u_resolution.x;
     
-    // Domain warping configuration
-    float zoomScale = 15.0;
+    vec2 holeUV = vec2(u_keyholePos.x, u_keyholePos.y * u_resolution.y / u_resolution.x);
+    
+    // Domain warping configuration: zoom in extremely far and crank distortion as transition increases
+    float zoomScale = mix(15.0, 1.0, u_transition);
     float timeScaleX = 0.1;
     float timeScaleY = 0.05;
     vec2 phaseOffset = vec2(5.2, 1.3);
-    float distortion = 2.0;
+    float distortion = mix(2.0, 10.0, u_transition);
 
-    vec2 p = uv * zoomScale;
+    // Zoom from the keyhole center
+    vec2 p = (uv - holeUV) * zoomScale + holeUV;
     
     // Domain warping with fbm
     vec2 q = vec2(fbm(p + u_time * timeScaleX), fbm(p + phaseOffset - u_time * timeScaleY));
     vec2 warped = p + distortion * q;
     
-    // Calculate mouse point in warped space
+    // Calculate mouse point in warped space, zooming from the same origin
     vec2 mouse_uv = u_mouse / u_resolution.xy;
     mouse_uv.y *= u_resolution.y / u_resolution.x;
-    vec2 mp = mouse_uv * zoomScale;
+    vec2 mp = (mouse_uv - holeUV) * zoomScale + holeUV;
     vec2 mq = vec2(fbm(mp + u_time * timeScaleX), fbm(mp + phaseOffset - u_time * timeScaleY));
     vec2 mouse_warped = mp + distortion * mq;
     
     vec2 v = voronoi(warped, mouse_warped);
     
     // Use difference for edges to get cells
-    float val = v.y - v.x;
-    
-    // Enhance contrast inside cells somewhat and add base noise mapping
-    val = pow(val, 0.6) + snoise(warped * 2.0) * 0.3;
+    float val = v.y - v.x;   
     
     // Posterize to 3 or 4 levels: black, dark grey, light grey, white
     float steps = 3.0;
@@ -139,9 +143,25 @@ const fsSource = `
     
     // Clamp it
     val = clamp(val, 0.0, 1.0);
+
+    // Radial wave rings from keyhole — inserted after voronoi, before noise,
+    // so waves share the same visual texture layer as the cells.
+    if (u_waveIntensity > 0.001) {
+      float waveDist = length(uv - holeUV);
+      float waveRing = sin(waveDist * 22.0 - u_wavePhase) * 0.5 + 0.5;
+      float waveFade = exp(-waveDist * 2.5);
+      val += waveRing * waveFade * u_waveIntensity * 0.7;
+    }
+
+        // Enhance contrast inside cells somewhat and add base noise mapping
+    val = pow(val, 0.6) + snoise(warped * 2.0) * 0.3;
     
     // Make the entire overlay transparent: white is clear, black is black.
     float alpha = 1.0 - val;
+    
+    // Fade to solid black smoothly during the second half of the transition
+    float fadeOut = smoothstep(0.5, 1.0, u_transition);
+    alpha = mix(alpha, 1.0, fadeOut);
     
     gl_FragColor = vec4(0.0, 0.0, 0.0, alpha);
   }
@@ -187,6 +207,29 @@ gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
 const timeLocation = gl.getUniformLocation(program, "u_time");
 const mouseLocation = gl.getUniformLocation(program, "u_mouse");
+const keyholePosLocation = gl.getUniformLocation(program, "u_keyholePos");
+const wavePhaseLocation = gl.getUniformLocation(program, "u_wavePhase");
+const waveIntensityLocation = gl.getUniformLocation(program, "u_waveIntensity");
+const transitionLocation = gl.getUniformLocation(program, "u_transition");
+
+// Wave state — written from interaction.js via window.bgSetWave()
+// Initialized to match the CSS starting position of the keyhole (50vw, 80vh)
+let _keyholePos = { x: 0.5, y: 0.2 };
+let _waveIntensity = 0;
+let _wavePhase = 0;
+let _transition = 0;
+
+// Call this from interaction.js to drive the radial waves.
+// keyholePos: { x, y } normalized screen coords (y flipped: 0=bottom, 1=top).
+window.bgSetWave = function(keyholePos, intensity) {
+  _keyholePos = keyholePos;
+  _waveIntensity = intensity;
+};
+
+// Drive page transition
+window.bgSetTransition = function(val) {
+  _transition = val;
+};
 
 let mouseX = window.innerWidth / 2;
 let mouseY = window.innerHeight / 2;
@@ -206,8 +249,13 @@ window.addEventListener('resize', resize);
 resize();
 
 function render(time) {
+  if (_waveIntensity > 0) _wavePhase += 0.055; // advance rings outward
   gl.uniform1f(timeLocation, time * 0.001);
   gl.uniform2f(mouseLocation, mouseX, canvas.height - mouseY);
+  gl.uniform2f(keyholePosLocation, _keyholePos.x, _keyholePos.y);
+  gl.uniform1f(wavePhaseLocation, _wavePhase);
+  gl.uniform1f(waveIntensityLocation, _waveIntensity);
+  gl.uniform1f(transitionLocation, _transition);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
   requestAnimationFrame(render);
 }

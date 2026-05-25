@@ -97,8 +97,8 @@
 
         #movable-key {
             position: absolute;
-            top: 50px;
-            left: 50vw;
+            top: 30vh;
+            right: 50px;
             width: 120px;
             cursor: grab;
             z-index: 10;
@@ -127,18 +127,23 @@
             z-index: 5;
             opacity: 0.9;
             filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
-            transition: transform 1.3s ease;
+            transition: top 1.0s cubic-bezier(0.1, .8, 0.22, 1), left 1.0s ease, transform 1.3s ease;
         }
 
         body.grabbing-mode h1,
         body.grabbing-mode h2,
-        body.grabbing-mode footer {
+        body.grabbing-mode footer,
+        body.unlocked-mode h1,
+        body.unlocked-mode h2,
+        body.unlocked-mode footer {
             opacity: 0;
             pointer-events: none;
         }
 
         body.grabbing-mode #keyhole {
-            transform: translate(-50%, -50%) scale(1.5);
+            top: 50vh;
+            left: 50vw;
+            transform: translate(-50%, -50%) scale(1.2);
         }
         footer a {
             transition: transform 1.3s ease;
