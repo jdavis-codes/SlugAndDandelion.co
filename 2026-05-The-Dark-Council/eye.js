@@ -96,7 +96,7 @@ function initEye() {
     
     // Track mouse
     document.addEventListener('mousemove', onDocumentMouseMove, false);
-    document.addEventListener('touchmove', onDocumentTouchMove, { passive: false });
+    document.addEventListener('touchmove', onDocumentTouchMove, { passive: true });
 
     animate();
 }
@@ -109,7 +109,6 @@ let twitchX = 0;
 let twitchY = 0;
 
 function onDocumentTouchMove(event) {
-    event.preventDefault(); // Prevent page scroll
     const touch = event.touches[0];
     if (!touch) return;
     const windowHalfX = window.innerWidth / 2;
