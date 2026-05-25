@@ -100,6 +100,7 @@ with check (public.check_portal_key());
 
 -- ============================================================
 -- Migration: wish tracking split into released vs caught
+
 -- ============================================================
 
 -- RSVPs: rename old 'wishes' column to 'wishes_released', add 'wishes_caught'
@@ -142,6 +143,21 @@ drop policy if exists "Protected insert rsvps" on public.rsvps;
 drop policy if exists "Public can insert rsvps" on public.rsvps;
 
 -- ============================================================
+-- Migration: re-open inserts for May 2026 (The Dark Council)
+-- ============================================================
+drop policy if exists "Protected insert rsvps" on public.rsvps;
+create policy "Protected insert rsvps"
+on public.rsvps for insert
+to anon, authenticated
+with check (public.check_portal_key());
+
+drop policy if exists "Protected insert comments" on public.comments;
+create policy "Protected insert comments"
+on public.comments for insert
+to anon, authenticated
+with check (public.check_portal_key());
+
+-- ============================================================
 -- Migration: replace portal_settings singleton with multi-row auth table
 -- check_portal_key() kept as a wrapper so RLS policies and JS need no changes.
 -- New sites use check_auth_key(key_name) directly.
@@ -155,12 +171,20 @@ create table if not exists public.auth (
   updated_at    timestamptz not null default now()
 );
 
--- Copy existing password hash across before dropping the old table
-insert into public.auth (name, password_hash)
-select 'portal', password_hash
-from public.portal_settings
-where id = 1
-on conflict (name) do nothing;
+-- Copy existing password hash across before dropping the old table (if it still exists)
+do $$
+begin
+  if exists (
+    select 1 from information_schema.tables
+    where table_schema = 'public' and table_name = 'portal_settings'
+  ) then
+    insert into public.auth (name, password_hash)
+    select 'portal', password_hash
+    from public.portal_settings
+    where id = 1
+    on conflict (name) do nothing;
+  end if;
+end $$;
 
 drop table if exists public.portal_settings;
 

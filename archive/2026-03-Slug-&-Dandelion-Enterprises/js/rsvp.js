@@ -383,7 +383,7 @@ async function refreshAttendees(supabase) {
   }
 
   if (!data.length) {
-    attendeeList.innerHTML = "<li>No responses yet.</li>";
+    attendeeList.innerHTML = "<li>. . .</li>";
     return;
   }
 
