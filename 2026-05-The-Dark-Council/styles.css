@@ -856,6 +856,17 @@ body.chamber-page.chamber-maat .chamber-title {
 		font-size: 0.82em;
 	}
 
+	body.guestbook-page .forms-container {
+		flex: 1 1 auto;
+		height: 0;
+		touch-action: pan-y;
+	}
+
+	body.guestbook-page .form-box {
+		/* Let guestbook boxes grow naturally so the parent container can scroll. */
+		flex: 0 0 auto;
+	}
+
 	body.rsvp-page .form-row label.narrow {
 		flex: 1;
 	}
@@ -905,7 +916,7 @@ body.chamber-page.chamber-maat .chamber-title {
     top: 60%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 70vw;
+    width: min(120vw, 900px);
 	z-index: -1;
     pointer-events: none;
 }
@@ -918,7 +929,7 @@ body.chamber-page.chamber-maat .chamber-title {
 	top: 60%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: 70vw;
+	width: min(120vw, 900px);
 	aspect-ratio: 1024 / 378;
 	z-index: 12;
 	pointer-events: none;
