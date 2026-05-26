@@ -36,10 +36,11 @@
                         seen. The eye of noon is above you now.</p>
 
                     <div class="chamber-body ra-panel">
-                        <p>Your task is to bring forth eternal summer, and eternal glory to Ra. to do this,
-                            you must prevent the ceremony from reaching full completion. The dark council
-                            members have all been instructed to bring sacrifices, herbs, and potions, but have
-                            not been told their purpose. Use this to prevent the darkness's return</p>
+                        <p>Your task is to infiltrate and secretly collaborate to bring forth eternal summer, 
+                            and eternal glory to Ra. to do this, you must prevent the ceremony from reaching 
+                            full completion. The dark council members have all been instructed to bring 
+                            sacrifices, herbs, and potions, but have not been told their purpose. Use this knowledge, 
+                            but be extremely careful not to arouse suspicion. the council does not know of Ra's plan... yet.</p>
                     </div>
                 </div>
             </section>
@@ -68,6 +69,27 @@
                 </div>
             </div>
 
+                <section class="ra-board" aria-labelledby="ra-board-title">
+                  <form id="ra-board-form" class="ra-board-form">
+                    <h2 id="ra-board-title"><span class="engraved-text">Whispers to the Sun</span></h2>
+                    <label>Name
+                      <input type="text" name="name" maxlength="80" required />
+                    </label>
+                    <label>Message
+                      <textarea name="message" rows="4" maxlength="280" required></textarea>
+                    </label>
+                    <button type="submit">Send to Ra</button>
+                    <div id="ra-board-status" class="ra-board-status" role="status" aria-live="polite"></div>
+                  </form>
+
+                  <div class="ra-board-feed">
+                    <h2><span class="engraved-text">Sunlit Signals</span></h2>
+                    <ul id="ra-message-list" class="ra-message-list">
+                      <li class="ra-empty">Listening for whispers...</li>
+                    </ul>
+                  </div>
+                </section>
+
             <div class="back-btn-wrap ra-back-wrap">
                 <a href="rsvp.html"
                   class="back-btn">&#x2190; Return to RSVP</a>
@@ -75,6 +97,8 @@
         </div>
 
         <script src="js/background.js"></script>
+              <script src="js/config.js"></script>
+              <script type="module" src="js/ra.js"></script>
 
     </body>
 

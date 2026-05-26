@@ -37,7 +37,7 @@ body.chamber-page.chamber-ra .ra-stage {
 	position: relative;
 	z-index: 2;
 	display: grid;
-	grid-template-columns: minmax(180px, 240px) minmax(0, 620px);
+	grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
 	gap: 2rem;
 	align-items: center;
 	width: min(92vw, 980px);
@@ -58,7 +58,9 @@ body.chamber-page.chamber-ra .ra-sun-mark {
 }
 
 body.chamber-page.chamber-ra .ra-copy,
-body.chamber-page.chamber-ra .ra-goal {
+body.chamber-page.chamber-ra .ra-goal,
+body.chamber-page.chamber-ra .ra-board-form,
+body.chamber-page.chamber-ra .ra-board-feed {
 	background-color: transparent;
 	background-image: url('assets/rock.png');
 	background-size: cover;
@@ -72,6 +74,7 @@ body.chamber-page.chamber-ra .ra-goal {
 body.chamber-page.chamber-ra .ra-copy {
 	text-align: left;
 	padding: 2rem;
+	padding-bottom: 2.7rem;
 }
 
 body.chamber-page.chamber-ra .ra-kicker {
@@ -84,7 +87,7 @@ body.chamber-page.chamber-ra .ra-kicker {
 
 body.chamber-page.chamber-ra .chamber-title {
 	margin: 0 0 0.65rem 0;
-	font-size: clamp(2.6rem, 6vw, 4.8rem);
+	font-size: clamp(1.6rem, 6vw, 4.8rem);
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
 }
@@ -173,6 +176,125 @@ body.chamber-page.chamber-ra .ra-back-wrap {
 	padding: 0.2rem 0 0;
 }
 
+body.chamber-page.chamber-ra .ra-board {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+	gap: 1rem;
+	width: min(92vw, 980px);
+	align-items: start;
+}
+
+body.chamber-page.chamber-ra .ra-board-form,
+body.chamber-page.chamber-ra .ra-board-feed {
+	padding: 1.4rem;
+	text-align: left;
+	color: #2f2f2f;
+}
+
+body.chamber-page.chamber-ra .ra-board h2 {
+	margin: 0 0 1rem 0;
+	font-size: 1.35rem;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+body.chamber-page.chamber-ra .ra-board label {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin-bottom: 0.8rem;
+	font-size: 0.95rem;
+}
+
+body.chamber-page.chamber-ra .ra-board input,
+body.chamber-page.chamber-ra .ra-board textarea {
+	background: rgba(255, 246, 220, 0.7);
+	border: 1px solid rgba(90, 36, 14, 0.25);
+	border-radius: 10px;
+	color: #3a1b0d;
+	font-family: "Special Elite", "Courier New", monospace;
+	font-size: 16px;
+	line-height: 1.3;
+	padding: 0.65rem 0.75rem;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+body.chamber-page.chamber-ra .ra-board textarea {
+	resize: vertical;
+	min-height: 7rem;
+}
+
+body.chamber-page.chamber-ra .ra-board button {
+	background: rgba(119, 22, 0, 0.78);
+	border: 1px solid rgba(95, 16, 0, 0.7);
+	border-radius: 10px;
+	color: #ffe6a4;
+	font-family: "Special Elite", "Courier New", monospace;
+	font-size: 1rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	padding: 0.75rem 0.9rem;
+	cursor: pointer;
+	transition: background 0.2s, border-color 0.2s;
+}
+
+body.chamber-page.chamber-ra .ra-board button:hover {
+	background: rgba(146, 27, 0, 0.84);
+	border-color: rgba(95, 16, 0, 0.88);
+}
+
+body.chamber-page.chamber-ra .ra-board-status {
+	min-height: 1.2rem;
+	padding-top: 0.65rem;
+	font-size: 0.92rem;
+	color: #7b1c00;
+}
+
+body.chamber-page.chamber-ra .ra-message-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	max-height: 26rem;
+	overflow-y: auto;
+}
+
+body.chamber-page.chamber-ra .ra-message-list li {
+	padding-bottom: 0.7rem;
+	border-bottom: 1px solid rgba(65, 33, 18, 0.18);
+}
+
+body.chamber-page.chamber-ra .ra-message-list li:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+body.chamber-page.chamber-ra .ra-message-name {
+	font-size: 0.95rem;
+	font-weight: 700;
+	margin-bottom: 0.2rem;
+}
+
+body.chamber-page.chamber-ra .ra-message-body {
+	font-size: 0.95rem;
+	line-height: 1.45;
+	color: #2f2f2f;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+body.chamber-page.chamber-ra .ra-message-time,
+body.chamber-page.chamber-ra .ra-empty {
+	font-size: 0.82rem;
+	letter-spacing: 0.03em;
+	color: rgba(86, 33, 18, 0.8);
+}
+
 body.chamber-page.chamber-ra .back-btn {
 	background: rgba(119, 22, 0, 0.78);
 	border-color: rgba(95, 16, 0, 0.7);
@@ -219,6 +341,11 @@ body.chamber-page.chamber-ra .back-btn:hover {
 	}
 
 	body.chamber-page.chamber-ra .ra-goals-tracker {
+		grid-template-columns: 1fr;
+		width: min(94vw, 620px);
+	}
+
+	body.chamber-page.chamber-ra .ra-board {
 		grid-template-columns: 1fr;
 		width: min(94vw, 620px);
 	}

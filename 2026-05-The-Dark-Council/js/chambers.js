@@ -49,7 +49,7 @@ async function resolveChamberDestination(password) {
   for (const chamber of CHAMBER_DESTINATIONS) {
     const { data, error } = await client.rpc("check_auth_key", { key_name: chamber.keyName });
     if (!error && data === true) {
-      return chamber.destination;
+      return chamber;
     }
   }
 
@@ -70,10 +70,15 @@ if (form && input) {
 
     if (err) err.textContent = "listening at the threshold...";
 
-    const dest = await resolveChamberDestination(password);
+    const chamber = await resolveChamberDestination(password);
 
-    if (dest) {
-      window.location.href = dest;
+    if (chamber) {
+      try {
+        sessionStorage.setItem("dark_council_chamber_key", chamber.keyName);
+        sessionStorage.setItem("dark_council_chamber_pass", password);
+      } catch (_) {}
+
+      window.location.href = chamber.destination;
       return;
     }
 
