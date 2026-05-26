@@ -4,7 +4,7 @@ create table if not exists public.rsvps (
   name text not null check (char_length(name) <= 80),
   email text,
   attending text not null check (attending in ('yes', 'no', 'maybe')),
-  guests int not null default 0 check (guests >= 0 and guests <= 1),
+  guests int not null default 0 check (guests >= 0 and guests <= 2),
   message text,
   private_message text check (private_message is null or char_length(private_message) <= 500)
   , wishes int not null default 0
@@ -119,6 +119,12 @@ end $$;
 alter table public.rsvps
   add column if not exists wishes_released int not null default 0 check (wishes_released >= 0),
   add column if not exists wishes_caught   int not null default 0 check (wishes_caught   >= 0);
+
+alter table public.rsvps
+  drop constraint if exists rsvps_guests_check;
+
+alter table public.rsvps
+  add constraint rsvps_guests_check check (guests >= 0 and guests <= 10);
 
 update public.rsvps
 set email = null
@@ -236,8 +242,8 @@ security definer
 set search_path = public
 as $$
 begin
-  if new_password is null or char_length(trim(new_password)) < 8 then
-    raise exception 'Password must be at least 8 characters.';
+  if new_password is null or char_length(trim(new_password)) < 1 then
+    raise exception 'Password must not be empty.';
   end if;
 
   insert into public.auth (name, password_hash, updated_at)

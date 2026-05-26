@@ -1,0 +1,233 @@
+body.chamber-page.chamber-ra {
+	background: #e0b827;
+	color: #4d1400;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+body.chamber-page.chamber-ra #bg-canvas {
+	z-index: 0;
+	opacity: 0.9;
+}
+
+body.chamber-page.chamber-ra .content {
+	justify-content: flex-start;
+	width: 100%;
+	min-height: 100vh;
+	height: auto;
+	overflow: visible;
+	padding: 2rem 1rem 3rem;
+	color: #4d1400;
+	animation: fadeInText 2s 0.35s ease forwards;
+	gap: 1.5rem;
+}
+
+body.chamber-page.chamber-ra .engraved-text {
+	display: inline-block;
+	font-weight: 400;
+	color: transparent;
+	background-image: linear-gradient(180deg, #3d3a36 0%, #171615 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	text-shadow: 0.65px 1.1px 0.9px rgba(255, 255, 255, 0.28);
+}
+
+body.chamber-page.chamber-ra .ra-stage {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	grid-template-columns: minmax(180px, 240px) minmax(0, 620px);
+	gap: 2rem;
+	align-items: center;
+	width: min(92vw, 980px);
+}
+
+body.chamber-page.chamber-ra .ra-sun-mark {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 1;
+	border-radius: 50%;
+	background: radial-gradient(circle at 50% 48%, rgba(255, 244, 194, 0.98) 0%, rgba(255, 205, 87, 0.92) 34%, rgba(234, 121, 12, 0.86) 64%, rgba(159, 36, 8, 0.88) 100%);
+	color: rgba(120, 15, 0, 0.86);
+	font-size: clamp(4rem, 14vw, 8rem);
+	min-height: 220px;
+	border: 1px solid rgba(132, 29, 0, 0.28);
+	backdrop-filter: blur(1px);
+}
+
+body.chamber-page.chamber-ra .ra-copy,
+body.chamber-page.chamber-ra .ra-goal {
+	background-color: transparent;
+	background-image: url('assets/rock.png');
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+	border: none;
+	border-radius: 20px;
+	box-shadow: none;
+}
+
+body.chamber-page.chamber-ra .ra-copy {
+	text-align: left;
+	padding: 2rem;
+}
+
+body.chamber-page.chamber-ra .ra-kicker {
+	margin: 0 0 0.75rem 0;
+	text-transform: uppercase;
+	letter-spacing: 0.22em;
+	font-size: 0.8rem;
+	color: transparent;
+}
+
+body.chamber-page.chamber-ra .chamber-title {
+	margin: 0 0 0.65rem 0;
+	font-size: clamp(2.6rem, 6vw, 4.8rem);
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+}
+
+body.chamber-page.chamber-ra .chamber-title .engraved-text {
+	text-shadow: 0.65px 1.1px 0.9px rgba(255, 255, 255, 0.28), 0 0 24px rgba(255, 227, 121, 0.22);
+}
+
+body.chamber-page.chamber-ra .chamber-sub {
+	margin: 0 0 1.4rem 0;
+	font-size: 1.05rem;
+	max-width: 34rem;
+}
+
+body.chamber-page.chamber-ra .ra-panel {
+	background: transparent;
+	border: none;
+	color: #2f2f2f;
+	font-size: 1.02rem;
+	line-height: 1.65;
+	box-shadow: none;
+	padding: 0.2rem 0 0;
+}
+
+body.chamber-page.chamber-ra .ra-panel p {
+	margin: 0 0 1rem 0;
+}
+
+body.chamber-page.chamber-ra .ra-panel p:last-child {
+	margin-bottom: 0;
+}
+
+body.chamber-page.chamber-ra .ra-goals-tracker {
+	position: relative;
+	z-index: 2;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+	width: min(92vw, 980px);
+}
+
+body.chamber-page.chamber-ra .ra-goal {
+	padding: 1.25rem;
+	text-align: left;
+	color: #2f2f2f;
+	min-height: 220px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+}
+
+body.chamber-page.chamber-ra .ra-goal-count {
+	margin: 0;
+	font-size: clamp(2.2rem, 5vw, 3.6rem);
+	line-height: 1;
+	color: #7b1c00;
+	text-shadow: 0 0 18px rgba(255, 214, 102, 0.28);
+}
+
+body.chamber-page.chamber-ra .ra-goal h3 {
+	margin: 0;
+	font-size: 1.05rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+body.chamber-page.chamber-ra .ra-goal p {
+	margin: 0;
+	line-height: 1.5;
+	font-size: 0.96rem;
+}
+
+body.chamber-page.chamber-ra .ra-goal span {
+	margin-top: auto;
+	font-size: 0.82rem;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: rgba(86, 33, 18, 0.8);
+}
+
+body.chamber-page.chamber-ra .ra-back-wrap {
+	position: relative;
+	z-index: 2;
+	width: min(92vw, 980px);
+	max-width: none;
+	padding: 0.2rem 0 0;
+}
+
+body.chamber-page.chamber-ra .back-btn {
+	background: rgba(119, 22, 0, 0.78);
+	border-color: rgba(95, 16, 0, 0.7);
+	color: #ffe6a4;
+	font-size: 1.15rem;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	box-shadow: 0 12px 24px rgba(90, 16, 0, 0.18);
+}
+
+body.chamber-page.chamber-ra .back-btn:hover {
+	background: rgba(146, 27, 0, 0.84);
+	border-color: rgba(95, 16, 0, 0.88);
+}
+
+@media (max-width: 600px) {
+	body.chamber-page.chamber-ra .content {
+		justify-content: flex-start;
+		min-height: auto;
+		height: auto;
+		overflow: visible;
+		padding: 1.2rem 0.75rem 2rem;
+	}
+
+	body.chamber-page.chamber-ra .ra-stage {
+		grid-template-columns: 1fr;
+		gap: 1rem;
+		width: min(94vw, 620px);
+	}
+
+	body.chamber-page.chamber-ra .ra-sun-mark {
+		min-height: 180px;
+		max-width: 220px;
+		justify-self: center;
+	}
+
+	body.chamber-page.chamber-ra .ra-copy {
+		padding: 1.2rem;
+		text-align: center;
+	}
+
+	body.chamber-page.chamber-ra .chamber-sub {
+		max-width: none;
+	}
+
+	body.chamber-page.chamber-ra .ra-goals-tracker {
+		grid-template-columns: 1fr;
+		width: min(94vw, 620px);
+	}
+
+	body.chamber-page.chamber-ra .ra-goal {
+		min-height: 0;
+	}
+
+	body.chamber-page.chamber-ra .ra-back-wrap {
+		width: min(94vw, 620px);
+	}
+}

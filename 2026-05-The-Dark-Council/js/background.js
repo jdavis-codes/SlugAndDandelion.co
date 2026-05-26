@@ -13,6 +13,7 @@ const fsSource = `
   uniform vec2 u_resolution;
   uniform float u_time;
   uniform vec2 u_mouse;
+  uniform vec3 u_tint;
   uniform vec2 u_keyholePos;    // normalized screen coords, y flipped for GL
   uniform float u_wavePhase;    // advances over time during unlock
   uniform float u_waveIntensity; // 0 = off, 1 = full
@@ -169,9 +170,25 @@ const fsSource = `
     float fadeOut = smoothstep(0.5, 1.0, u_transition);
     alpha = mix(alpha, 1.0, fadeOut);
     
-    gl_FragColor = vec4(0.0, 0.0, 0.0, alpha);
+    gl_FragColor = vec4(u_tint, alpha);
   }
 `;
+
+function parseVec3(value, fallback) {
+  if (!value) return fallback;
+  const parts = value.split(',').map((part) => Number(part.trim()));
+  if (parts.length !== 3 || parts.some((part) => Number.isNaN(part))) return fallback;
+  return parts;
+}
+
+function parseNormalized(value, fallback) {
+  const num = Number(value);
+  if (Number.isNaN(num)) return fallback;
+  return Math.max(0, Math.min(1, num));
+}
+
+const pageTheme = document.body?.dataset || {};
+const shaderTint = parseVec3(pageTheme.shaderTint, [0, 0, 0]);
 
 function createShader(gl, type, source) {
   const shader = gl.createShader(type);
@@ -213,6 +230,7 @@ gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
 const timeLocation = gl.getUniformLocation(program, "u_time");
 const mouseLocation = gl.getUniformLocation(program, "u_mouse");
+const tintLocation = gl.getUniformLocation(program, "u_tint");
 const keyholePosLocation = gl.getUniformLocation(program, "u_keyholePos");
 const wavePhaseLocation = gl.getUniformLocation(program, "u_wavePhase");
 const waveIntensityLocation = gl.getUniformLocation(program, "u_waveIntensity");
@@ -220,7 +238,10 @@ const transitionLocation = gl.getUniformLocation(program, "u_transition");
 
 // Wave state — written from interaction.js via window.bgSetWave()
 // Initialized to match the CSS starting position of the keyhole (50vw, 80vh)
-let _keyholePos = { x: 0.5, y: 0.2 };
+let _keyholePos = {
+  x: parseNormalized(pageTheme.shaderOriginX, 0.5),
+  y: parseNormalized(pageTheme.shaderOriginY, 0.2),
+};
 let _waveIntensity = 0;
 let _wavePhase = 0;
 let _transition = 0;
@@ -258,6 +279,7 @@ function render(time) {
   if (_waveIntensity > 0) _wavePhase += 0.055; // advance rings outward
   gl.uniform1f(timeLocation, time * 0.001);
   gl.uniform2f(mouseLocation, mouseX, canvas.height - mouseY);
+  gl.uniform3f(tintLocation, shaderTint[0], shaderTint[1], shaderTint[2]);
   gl.uniform2f(keyholePosLocation, _keyholePos.x, _keyholePos.y);
   gl.uniform1f(wavePhaseLocation, _wavePhase);
   gl.uniform1f(waveIntensityLocation, _waveIntensity);

@@ -53,10 +53,11 @@ if (rsvpForm) {
     if (rsvpStatus) rsvpStatus.textContent = "Submitting...";
 
     const fd = new FormData(rsvpForm);
+    const guestCount = Math.max(0, Math.min(2, Number(fd.get("guests") || 0) || 0));
     const payload = {
       name:            String(fd.get("name")            || "").trim(),
       attending:       String(fd.get("attending")       || "maybe"),
-      guests:          Number(fd.get("guests")          || 0),
+      guests:          guestCount,
       message:         String(fd.get("message")         || "").trim() || null,
       private_message: String(fd.get("private_message") || "").trim() || null,
     };

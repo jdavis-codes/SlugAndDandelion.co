@@ -18,6 +18,10 @@
             <div class="eyelids"></div>
         </div>
 
+        <div class="chamber-warning" id="chamber-warning" aria-hidden="true">
+            <span>DO NOT GO WHERE YOU DO NOT BELONG</span>
+        </div>
+
         <div class="forms-container">
             <!-- RSVP Form -->
             <form id="rsvp-form" class="form-box">
@@ -56,13 +60,22 @@
             </div>
         </div>
 
-        <!-- Guestbook Button -->
-        <div class="guestbook-btn-wrap">
+        <!-- Guestbook Button + Inner Chamber gate -->
+        <div class="guestbook-btn-wrap chamber-row">
             <a href="guestbook.html" class="guestbook-btn"> 𓀡 Guestbook</a>
+            <form id="chamber-form" class="chamber-form" autocomplete="off">
+                <input id="chamber-pass" name="chamber_pass" type="password"
+                       placeholder="𓂀 inner chamber password"
+                       aria-label="Inner chamber password"
+                       autocomplete="off" />
+                <button type="submit" class="chamber-btn" aria-label="Enter chamber">enter &rarr;</button>
+            </form>
         </div>
+        <div id="chamber-err" class="chamber-err" role="status" aria-live="polite"></div>
     </div>
 
     <script src="js/config.js"></script>
     <script type="module" src="js/rsvp.js"></script>
+    <script type="module" src="js/chambers.js"></script>
 </body>
 </html>
