@@ -1,6 +1,12 @@
 const keyEl = document.getElementById('movable-key');
 const keyholeEl = document.getElementById('keyhole');
 
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    document.body.classList.add('keyhole-anim-ready');
+  });
+});
+
 // Create several offset clones to fake a thicker edge when the key turns into the slot.
 const keyThicknessLayers = Array.from({ length: 10 }, (_, index) => {
   const layer = keyEl.cloneNode(true);

@@ -157,6 +157,10 @@ body.home-page #keyhole {
 	z-index: 5;
 	opacity: 0.9;
 	filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.5));
+	transition: none;
+}
+
+body.home-page.keyhole-anim-ready #keyhole {
 	transition: top 1s cubic-bezier(0.1, 0.8, 0.22, 1), left 1s ease, transform 1.3s ease;
 }
 
