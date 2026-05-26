@@ -85,3 +85,94 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+// ── Custom Rock Scrollbar ──────────────────────────────────────────────────
+const scrollWrapper = document.getElementById("guestbook-scroller");
+const scrollThumb = document.getElementById("rock-thumb");
+const scrollContainer = document.getElementById("rock-scrollbar");
+
+if (scrollWrapper && scrollThumb && scrollContainer) {
+  let isDragging = false;
+  let startY = 0;
+  let startScrollTop = 0;
+
+  const updateScrollbar = () => {
+    const { scrollTop, scrollHeight, clientHeight } = scrollWrapper;
+    if (scrollHeight <= clientHeight + 2) {
+      scrollContainer.classList.remove("active");
+      return;
+    }
+    scrollContainer.classList.add("active");
+    
+    const maxScroll = scrollHeight - clientHeight;
+    const trackHeight = scrollContainer.clientHeight;
+    const thumbHeight = scrollThumb.offsetHeight;
+    const maxThumbTop = trackHeight - thumbHeight;
+    
+    // Prevent divide by zero
+    if (maxScroll <= 0 || maxThumbTop <= 0) return;
+    
+    const scrollRatio = scrollTop / maxScroll;
+    const thumbTop = scrollRatio * maxThumbTop;
+    scrollThumb.style.top = `${thumbTop}px`;
+  };
+
+  scrollWrapper.addEventListener("scroll", () => {
+    if (!isDragging) updateScrollbar();
+  });
+
+  const onDrag = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const deltaY = clientY - startY;
+    
+    const { scrollHeight, clientHeight } = scrollWrapper;
+    const maxScroll = scrollHeight - clientHeight;
+    const trackHeight = scrollContainer.clientHeight;
+    const thumbHeight = scrollThumb.offsetHeight;
+    const maxThumbTop = trackHeight - thumbHeight;
+    
+    if (maxScroll <= 0 || maxThumbTop <= 0) return;
+
+    const newThumbTop = Math.min(Math.max(0, (startScrollTop / maxScroll * maxThumbTop) + deltaY), maxThumbTop);
+    const scrollRatio = newThumbTop / maxThumbTop;
+    
+    scrollWrapper.scrollTop = scrollRatio * maxScroll;
+  };
+
+  const stopDrag = () => {
+    isDragging = false;
+    document.removeEventListener("mousemove", onDrag);
+    document.removeEventListener("mouseup", stopDrag);
+    document.removeEventListener("touchmove", onDrag);
+    document.removeEventListener("touchend", stopDrag);
+    document.body.style.userSelect = ""; // Restore selection
+  };
+
+  const startDrag = (e) => {
+    if (e.cancelable) e.preventDefault();
+    isDragging = true;
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
+    startScrollTop = scrollWrapper.scrollTop;
+    document.body.style.userSelect = "none"; // Prevent text selection while dragging
+    
+    document.addEventListener("mousemove", onDrag);
+    document.addEventListener("mouseup", stopDrag);
+    document.addEventListener("touchmove", onDrag, { passive: false });
+    document.addEventListener("touchend", stopDrag);
+  };
+
+  scrollThumb.addEventListener("mousedown", startDrag);
+  scrollThumb.addEventListener("touchstart", startDrag, { passive: false });
+
+  window.addEventListener("resize", updateScrollbar);
+  
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => updateScrollbar());
+    ro.observe(scrollWrapper);
+    const formBox = scrollWrapper.querySelector('.forms-container');
+    if (formBox) ro.observe(formBox);
+  }
+}
