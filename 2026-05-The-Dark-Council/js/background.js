@@ -342,10 +342,32 @@ window.bgSetTransition = function(val) {
 let mouseX = window.innerWidth / 2;
 let mouseY = window.innerHeight / 2;
 
+function updatePointerPosition(clientX, clientY) {
+  mouseX = clientX;
+  mouseY = clientY;
+}
+
 window.addEventListener('mousemove', (e) => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
+  updatePointerPosition(e.clientX, e.clientY);
 });
+
+window.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+  if (!touch) return;
+  updatePointerPosition(touch.clientX, touch.clientY);
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+  const touch = e.touches[0];
+  if (!touch) return;
+  updatePointerPosition(touch.clientX, touch.clientY);
+}, { passive: true });
+
+window.addEventListener('touchend', (e) => {
+  const touch = e.changedTouches[0];
+  if (!touch) return;
+  updatePointerPosition(touch.clientX, touch.clientY);
+}, { passive: true });
 
 function resize() {
   canvas.width = window.innerWidth;
