@@ -31,7 +31,7 @@ async function loadComments() {
 
   if (!commentList) return;
   if (error) { commentList.innerHTML = `<li style="color:#666;">Could not load: ${error.message}</li>`; return; }
-  if (!data.length) { commentList.innerHTML = "<li style=\"color:#666;\">No entries yet — be the first.</li>"; return; }
+  if (!data.length) { commentList.innerHTML = "<li style=\"color:#666;\">. . . </li>"; return; }
 
   commentList.innerHTML = "";
   data.forEach(row => {
