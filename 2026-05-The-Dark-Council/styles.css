@@ -879,3 +879,77 @@ body.chamber-page.chamber-maat .chamber-title {
 		font-size: 1.5em;
 	}
 }
+
+.eye-banner-wrapper {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70vw;
+	z-index: -1;
+    pointer-events: none;
+}
+.eye-banner-wrapper img {
+    width: 100%;
+    display: block;
+}
+.eye-banner-links {
+	position: absolute;
+	top: 60%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 70vw;
+	aspect-ratio: 1024 / 378;
+	z-index: 12;
+	pointer-events: none;
+}
+.banner-link {
+    position: absolute;
+    top: 20%;
+    height: 60%;
+	width: 40%;
+	z-index: 20;
+    pointer-events: auto;
+}
+.banner-link.left-link {
+	left: 5%;
+}
+.banner-link.right-link {
+    right: 5%;
+}
+
+.main-banner {
+	position: absolute;
+	top: 20%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 77vw;
+	z-index: -2;
+	pointer-events: none;
+	filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+}
+
+/* smoothly hide banner on key grab */
+
+.main-banner #movable-key:active {
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+@media (max-width: 600px) {
+	.eye-banner-wrapper {
+		top: 82%;
+		width: 120vw;
+	}
+
+	.eye-banner-links {
+		top: 82%;
+		width: 120vw;
+	}
+
+	.main-banner {
+		width: 120vw;
+		top: 30%;
+	}
+	
+}
