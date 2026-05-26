@@ -1,5 +1,5 @@
 body.chamber-page.chamber-ra {
-	background: #e0b827;
+	background: #fffb009b;
 	color: #4d1400;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -7,7 +7,12 @@ body.chamber-page.chamber-ra {
 
 body.chamber-page.chamber-ra #bg-canvas {
 	z-index: 0;
-	opacity: 0.9;
+	opacity: 0;
+	animation: fadeInCanvasRa 2s ease forwards;
+}
+
+@keyframes fadeInCanvasRa {
+	to { opacity: 0.9; }
 }
 
 body.chamber-page.chamber-ra .content {
@@ -198,7 +203,7 @@ body.chamber-page.chamber-ra .ra-board-feed {
 }
 
 body.chamber-page.chamber-ra .ra-board-header {
-	padding: 0.36rem 1.2rem;
+	padding: 0.36rem 0.8rem;
 	background: rgba(0, 0, 0, 0.94);
 	border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }

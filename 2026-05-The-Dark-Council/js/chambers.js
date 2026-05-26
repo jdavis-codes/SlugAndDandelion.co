@@ -24,9 +24,10 @@ function makeClient(password) {
 function clearDenialState() {
   if (!body) return;
   body.classList.remove("chamber-denied");
+  if (input) input.readOnly = false;
 }
 
-function triggerDenialState() {
+function triggerDenialState(originalText) {
   if (!body) return;
 
   clearTimeout(denyTimer);
@@ -34,9 +35,17 @@ function triggerDenialState() {
   void body.offsetWidth;
   body.classList.add("chamber-denied");
 
+  if (input) {
+    input.value = "𓂀 the chamber denies you";
+    input.readOnly = true;
+  }
+
   denyTimer = window.setTimeout(() => {
     clearDenialState();
-    input?.focus();
+    if (input) {
+      input.value = originalText || "";
+      input.focus();
+    }
   }, 2800);
 }
 
@@ -60,11 +69,14 @@ if (form && input) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    if (body && body.classList.contains("chamber-denied")) {
+      return;
+    }
+
     const password = String(input.value || "").trim();
     if (!password) {
-      if (err) err.textContent = "𓂀 the chamber denies you";
-      triggerDenialState();
-      input.focus();
+      if (err) err.textContent = "";
+      triggerDenialState("");
       return;
     }
 
@@ -82,9 +94,8 @@ if (form && input) {
       return;
     }
 
-    if (err) err.textContent = "𓂀 the chamber denies you";
-    input.value = "";
-    triggerDenialState();
+    if (err) err.textContent = "";
+    triggerDenialState(password);
   });
 
   input.addEventListener("input", () => {

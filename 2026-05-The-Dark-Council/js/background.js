@@ -1,3 +1,54 @@
+/**
+ * ==========================================================================================
+ *  THE DARK COUNCIL - VORONOI WEBGL SHADER BACKGROUND
+ * ==========================================================================================
+ * 
+ * This file generates a dynamic, interactive WebGL background using a Voronoi + FBM noise 
+ * algorithm. It is heavily configurable via HTML `data-*` attributes on the <body> tag,
+ * as well as through global window functions called by interaction scripts.
+ * 
+ * ------------------------------------------------------------------------------------------
+ * 1. HTML DATA ATTRIBUTES (Adjust these on your <body> tag)
+ * ------------------------------------------------------------------------------------------
+ * data-shader-tint   : The base color tint (Standard CSS Hex like #ff0000).
+ *                      e.g., data-shader-tint="#c43b0f"
+ * 
+ * data-shader-scale  : Float. Multiplies the base zoom. < 1 zooms in (larger cells), 
+ *                      > 1 zooms out (smaller cells). Default: 1.0
+ * 
+ * data-shader-steps  : Float. Number of posterization steps (color bands). Lower numbers 
+ *                      give sharp, stepped contrast. Higher numbers are smoother. Default: 3.0
+ * 
+ * data-shader-cull   : Float. Threshold (0.0 - 1.0) for removing outer bands of the stripe.
+ *                      The higher the cull, the thinner the stripes. Default: 0.0
+ * 
+ * data-shader-origin-x / y : Float (0.0 - 1.0). Starting normalized screen coordinates 
+ *                            for the wave origin / zoom keyhole. Default: (0.5, 0.2)
+ * 
+ * ------------------------------------------------------------------------------------------
+ * 2. DYNAMIC STATE VARIABLES (Triggered by interaction.js during unlock events)
+ * ------------------------------------------------------------------------------------------
+ * window.bgSetWave(pos, intensity) : Sets origin dict {x, y} and wave strength prior to unlock.
+ * window.bgSetTransition(val)      : Transition 0.0 -> 1.0. Applies heavy domain warping, 
+ *                                    extreme zoom, and eventually fades entirely to black.
+ * 
+ * ------------------------------------------------------------------------------------------
+ * 3. INTERNAL SHADER UNIFORMS (Passed to glSL fragment shader)
+ * ------------------------------------------------------------------------------------------
+ * u_resolution    : Screen dimensions in pixels (prevents stretching).
+ * u_time          : Elapsed execution time. Drives cell movement and FBM noise warping.
+ * u_mouse         : Current mouse (x, y) coordinates. Creates a large cell repelling others.
+ * u_tint          : Bound to data-shader-tint.
+ * u_scale         : Bound to data-shader-scale.
+ * u_steps         : Bound to data-shader-steps.
+ * u_cull          : Bound to data-shader-cull.
+ * u_keyholePos    : The dynamic origin coordinates for waves and transition zooming.
+ * u_wavePhase     : The animated outward expansion phase of the ripples.
+ * u_waveIntensity : Visibility/opacity of unlocking ripples (0 up to 1+).
+ * u_transition    : Drives the final zoom-in / wipe transition state.
+ * ==========================================================================================
+ */
+
 const canvas = document.getElementById('bg-canvas');
 const gl = canvas.getContext('webgl');
 
@@ -18,6 +69,9 @@ const fsSource = `
   uniform float u_wavePhase;    // advances over time during unlock
   uniform float u_waveIntensity; // 0 = off, 1 = full
   uniform float u_transition;
+  uniform float u_scale;
+  uniform float u_steps;
+  uniform float u_cull;
 
   vec3 hash3(vec2 p) {
     vec3 q = vec3(dot(p, vec2(127.1, 311.7)), 
@@ -115,7 +169,7 @@ const fsSource = `
     // Decrease base zoom scale on narrower screens so cells don't appear too small on mobile
     // Using step and mix avoids WebGL 1 float comparison branching bugs on iOS Safari
     float isDesktop = step(768.0, u_resolution.x);
-    float baseZoom = mix(8.0, 15.0, isDesktop);
+    float baseZoom = mix(8.0, 15.0, isDesktop) * u_scale;
     float targetZoom = mix(0.1, 1.0, isDesktop); // Zoom in much deeper on mobile to guarantee a dramatic warp
 
     // Domain warping configuration: zoom in extremely far and crank distortion as transition increases
@@ -144,9 +198,14 @@ const fsSource = `
     // Use difference for edges to get cells
     float val = v.y - v.x;   
     
-    // Posterize to 3 or 4 levels: black, dark grey, light grey, white
-    float steps = 3.0;
+    // Posterize to n levels
+    float steps = u_steps;
     val = floor(val * steps + 0.1) / steps;
+    
+    // Higher cull = thinner stripes by removing outer opacity bands
+    if ((1.0 - val) < u_cull) {
+      val = 1.0;
+    }
     
     // Clamp it
     val = clamp(val, 0.0, 1.0);
@@ -174,11 +233,27 @@ const fsSource = `
   }
 `;
 
-function parseVec3(value, fallback) {
+function parseColorToVec3(value, fallback) {
   if (!value) return fallback;
-  const parts = value.split(',').map((part) => Number(part.trim()));
-  if (parts.length !== 3 || parts.some((part) => Number.isNaN(part))) return fallback;
-  return parts;
+  let str = value.trim();
+  
+  // Try Hex
+  if (str.startsWith('#') || /^[0-9A-Fa-f]{3,6}$/.test(str)) {
+    let hex = str.startsWith('#') ? str.slice(1) : str;
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    if (hex.length === 6) {
+      const r = parseInt(hex.slice(0, 2), 16) / 255;
+      const g = parseInt(hex.slice(2, 4), 16) / 255;
+      const b = parseInt(hex.slice(4, 6), 16) / 255;
+      if (!Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) return [r, g, b];
+    }
+  }
+
+  // Fallback to comma-separated floats
+  const parts = str.split(',').map((part) => Number(part.trim()));
+  if (parts.length === 3 && !parts.some((part) => Number.isNaN(part))) return parts;
+  
+  return fallback;
 }
 
 function parseNormalized(value, fallback) {
@@ -188,7 +263,10 @@ function parseNormalized(value, fallback) {
 }
 
 const pageTheme = document.body?.dataset || {};
-const shaderTint = parseVec3(pageTheme.shaderTint, [0, 0, 0]);
+const shaderTint = parseColorToVec3(pageTheme.shaderTint, [0, 0, 0]);
+const shaderScale = parseFloat(pageTheme.shaderScale) || 1.0;
+const shaderSteps = parseFloat(pageTheme.shaderSteps) || 3.0;
+const shaderCull = parseFloat(pageTheme.shaderCull) || 0.0;
 
 function createShader(gl, type, source) {
   const shader = gl.createShader(type);
@@ -235,6 +313,9 @@ const keyholePosLocation = gl.getUniformLocation(program, "u_keyholePos");
 const wavePhaseLocation = gl.getUniformLocation(program, "u_wavePhase");
 const waveIntensityLocation = gl.getUniformLocation(program, "u_waveIntensity");
 const transitionLocation = gl.getUniformLocation(program, "u_transition");
+const scaleLocation = gl.getUniformLocation(program, "u_scale");
+const stepsLocation = gl.getUniformLocation(program, "u_steps");
+const cullLocation = gl.getUniformLocation(program, "u_cull");
 
 // Wave state — written from interaction.js via window.bgSetWave()
 // Initialized to match the CSS starting position of the keyhole (50vw, 80vh)
@@ -284,6 +365,9 @@ function render(time) {
   gl.uniform1f(wavePhaseLocation, _wavePhase);
   gl.uniform1f(waveIntensityLocation, _waveIntensity);
   gl.uniform1f(transitionLocation, _transition);
+  gl.uniform1f(scaleLocation, shaderScale);
+  gl.uniform1f(stepsLocation, shaderSteps);
+  gl.uniform1f(cullLocation, shaderCull);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
   requestAnimationFrame(render);
 }

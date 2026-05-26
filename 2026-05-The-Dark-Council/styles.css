@@ -206,7 +206,7 @@ body.guestbook-page .bg-texture {
 	background-position: center center;
 	background-repeat: no-repeat;
 	opacity: 0;
-	animation: fadeIn 2s ease forwards;
+	animation: fadeIn 0.7s ease forwards;
 	z-index: 1;
 }
 
@@ -222,7 +222,7 @@ body.guestbook-page .content {
 	font-family: "Special Elite", "Courier New", monospace;
 	text-align: center;
 	opacity: 0;
-	animation: fadeInText 3s 1s ease forwards;
+	animation: fadeInText 1s 1s ease forwards;
 	z-index: 2;
 	padding: 0.5rem 0;
 	box-sizing: border-box;
@@ -374,7 +374,7 @@ body.guestbook-page .form-box label {
 	display: flex;
 	flex-direction: column;
 	width: 100%;
-	font-size: 0.9em;
+	font-size: 1.0rem;
 }
 
 body.rsvp-page .form-row label {
@@ -444,7 +444,7 @@ body.guestbook-page .comment-status {
 	font-size: 1.2em;
 	color: #aaa;
 	text-align: center;
-	min-height: 1.2em;
+	/* min-height: 1.2em; */
 }
 
 body.rsvp-page .attendee-list,
@@ -454,7 +454,7 @@ body.guestbook-page .comment-list {
 	padding: 0;
 	overflow-y: auto;
 	flex: 1;
-	font-size: 0.9em;
+	font-size: 1.0rem;
 }
 
 body.rsvp-page .attendee-list li,

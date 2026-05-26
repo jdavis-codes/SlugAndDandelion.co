@@ -107,6 +107,10 @@ let targetX = 0;
 let targetY = 0;
 let twitchX = 0;
 let twitchY = 0;
+let twitchTargetX = 0;
+let twitchTargetY = 0;
+let twitchIsDwelling = false;
+let twitchDwellUntil = 0;
 
 function onDocumentTouchMove(event) {
     const touch = event.touches[0];
@@ -157,22 +161,55 @@ function animate() {
     // Notice that a negative rotation around X points the eye up/down correctly
     // And negative around Y points left/right
     if (eyeGroup) {
-        // Fast lerp for cursor tracking
-        eyeGroup.rotation.y += (targetX - eyeGroup.rotation.y) * 0.9;
-        eyeGroup.rotation.x += (targetY - eyeGroup.rotation.x) * 0.9;
+        if (document.body.classList.contains('chamber-denied')) {
+            const time = Date.now() * 0.004;
+            // rapid rotation on one axis
+            eyeGroup.rotation.x = (eyeGroup.rotation.x + 0.15) % (Math.PI * 2);
+            // shift that axis slowly
+            eyeGroup.rotation.y = (eyeGroup.rotation.y - Math.sin(time) * 0.05) % (Math.PI * 2);
+            // eyeGroup.rotation.z = (eyeGroup.rotation.z + Math.cos(time * 0.7) * 0.05) % (Math.PI * 2);
+        } else {
+            // Fast lerp for cursor tracking
+            eyeGroup.rotation.y += (targetX - eyeGroup.rotation.y) * 0.9;
+            eyeGroup.rotation.x += (targetY - eyeGroup.rotation.x) * 0.9;
+            eyeGroup.rotation.z += (0 - eyeGroup.rotation.z) * 0.1;
 
-        // Occasionally fire a twitch impulse
-        if (Math.random() < 0.002) {
-            twitchX += (Math.random() - 0.5) * 0.38;
-            twitchY += (Math.random() - 0.5) * 0.34;
+            // Occasionally fire a twitch impulse
+            if (Math.random() < 0.004) {
+                twitchTargetX += (Math.random() - 0.5) * 1.78;
+                twitchTargetY += (Math.random() - 0.5) * 1.74;
+                twitchIsDwelling = false;
+                twitchDwellUntil = 0;
+                // twitchTargetX = THREE.MathUtils.clamp(twitchTargetX, -0.24, 0.24);
+                // twitchTargetY = THREE.MathUtils.clamp(twitchTargetY, -0.2, 0.2);
+            }
+
+            // Smoothly ease the twitch up toward its target, pause briefly, then back down to rest
+            twitchX += (twitchTargetX - twitchX) * 0.16;
+            twitchY += (twitchTargetY - twitchY) * 0.16;
+
+            const hasTwitchTarget = Math.abs(twitchTargetX) > 0.001 || Math.abs(twitchTargetY) > 0.001;
+            const reachedTwitchTarget = Math.abs(twitchTargetX - twitchX) < 0.01 && Math.abs(twitchTargetY - twitchY) < 0.01;
+
+            if (!twitchIsDwelling && hasTwitchTarget && reachedTwitchTarget) {
+                twitchIsDwelling = true;
+                twitchDwellUntil = performance.now() + 80 + Math.random() * 320;
+            }
+
+            if (twitchIsDwelling) {
+                if (performance.now() >= twitchDwellUntil) {
+                    twitchIsDwelling = false;
+                }
+            }
+
+            if (!twitchIsDwelling) {
+                twitchTargetX += (0 - twitchTargetX) * 0.12;
+                twitchTargetY += (0 - twitchTargetY) * 0.12;
+            }
+
+            eyeGroup.rotation.y += twitchX;
+            eyeGroup.rotation.x += twitchY;
         }
-
-        // Twitch decays back to zero with a slower lerp than the main tracking
-        twitchX += (0 - twitchX) * 0.05;
-        twitchY += (0 - twitchY) * 0.05;
-
-        eyeGroup.rotation.y //+= twitchX;
-        eyeGroup.rotation.x //+= twitchY;
     }
 
     renderer.render(scene, camera);
