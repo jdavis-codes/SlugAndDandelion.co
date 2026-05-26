@@ -927,6 +927,12 @@ body.chamber-page.chamber-maat .chamber-title {
 
 	body.rsvp-page .rsvp-main {
 		width: 100%;
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		overflow-x: hidden;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch;
 		padding-bottom: 0.35rem;
 	}
 
@@ -1005,10 +1011,10 @@ body.chamber-page.chamber-maat .chamber-title {
 
 .eye-banner-wrapper {
     position: absolute;
-    top: 60%;
+    top: 65%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: min(120vw, 900px);
+    width: min(120vw, 950px);
 	z-index: -1;
     pointer-events: none;
 }
