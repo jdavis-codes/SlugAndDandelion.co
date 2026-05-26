@@ -77,7 +77,10 @@ body.home-page h1 {
 	text-align: center;
 	font-size: 12vw;
 	transition: opacity 0.5s ease;
-	position: relative;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 	z-index: 5;
 	pointer-events: none;
 }
@@ -542,12 +545,60 @@ body.guestbook-page #ledger-box {
 	box-shadow: none;
 	max-height: 240px;
 	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+}
+
+body.guestbook-page .ledger-scroll-container {
+	display: flex;
+	flex-direction: row;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+	padding-right: 15px; /* space for the rock scrollbar */
 }
 
 body.guestbook-page #ledger-box .comment-list {
 	padding-bottom: 20px;
 	-webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent 100%);
 	mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent 100%);
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none;    /* Firefox */
+}
+
+body.guestbook-page #ledger-box .comment-list::-webkit-scrollbar {
+	display: none; /* Chrome, Safari, Opera */
+}
+
+.rock-scrollbar {
+	position: relative;
+	width: 14px;
+	margin-left: 5px;
+	margin-right: -10px; /* offset the container padding slightly */
+	margin-bottom: 20px; /* match the mask stopping point roughly */
+	background: rgba(0, 0, 0, 0.15);
+	box-shadow: inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.6), inset -1px -1px 2px rgba(255, 255, 255, 0.1);
+	border-radius: 7px;
+	visibility: hidden;
+}
+.rock-scrollbar.active {
+	visibility: visible;
+}
+
+.rock-thumb {
+	position: absolute;
+	width: 14px;
+	height: 28px;
+	background-image: url('assets/rock.png');
+	background-size: cover;
+	background-position: center;
+	border-radius: 7px;
+	box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+	cursor: grab;
+	top: 0;
+}
+.rock-thumb:active {
+	cursor: grabbing;
 }
 
 body.guestbook-page #ledger-box .comment-list li {
@@ -842,6 +893,7 @@ body.chamber-page.chamber-maat .chamber-title {
 @media (max-width: 600px) {
 	body.home-page h1 {
 		font-size: min(20vw, 12vh);
+		top: 52%;
 	}
 
 	body.home-page #movable-key {

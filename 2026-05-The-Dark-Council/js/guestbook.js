@@ -87,7 +87,7 @@ function escapeHtml(str) {
 }
 
 // ── Custom Rock Scrollbar ──────────────────────────────────────────────────
-const scrollWrapper = document.getElementById("guestbook-scroller");
+const scrollWrapper = document.getElementById("comment-list");
 const scrollThumb = document.getElementById("rock-thumb");
 const scrollContainer = document.getElementById("rock-scrollbar");
 
@@ -117,9 +117,7 @@ if (scrollWrapper && scrollThumb && scrollContainer) {
     scrollThumb.style.top = `${thumbTop}px`;
   };
 
-  scrollWrapper.addEventListener("scroll", () => {
-    if (!isDragging) updateScrollbar();
-  });
+  scrollWrapper.addEventListener("scroll", updateScrollbar);
 
   const onDrag = (e) => {
     if (!isDragging) return;
@@ -140,6 +138,7 @@ if (scrollWrapper && scrollThumb && scrollContainer) {
     const scrollRatio = newThumbTop / maxThumbTop;
     
     scrollWrapper.scrollTop = scrollRatio * maxScroll;
+    scrollThumb.style.top = `${newThumbTop}px`;
   };
 
   const stopDrag = () => {
@@ -175,4 +174,12 @@ if (scrollWrapper && scrollThumb && scrollContainer) {
     const formBox = scrollWrapper.querySelector('.forms-container');
     if (formBox) ro.observe(formBox);
   }
+
+  if (window.MutationObserver) {
+    const mo = new MutationObserver(() => updateScrollbar());
+    mo.observe(scrollWrapper, { childList: true, subtree: true });
+  }
+
+  // Trigger once initially
+  updateScrollbar();
 }
