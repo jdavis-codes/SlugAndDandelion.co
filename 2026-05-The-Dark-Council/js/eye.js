@@ -171,8 +171,8 @@ function animate() {
         twitchX += (0 - twitchX) * 0.05;
         twitchY += (0 - twitchY) * 0.05;
 
-        eyeGroup.rotation.y += twitchX;
-        eyeGroup.rotation.x += twitchY;
+        eyeGroup.rotation.y //+= twitchX;
+        eyeGroup.rotation.x //+= twitchY;
     }
 
     renderer.render(scene, camera);

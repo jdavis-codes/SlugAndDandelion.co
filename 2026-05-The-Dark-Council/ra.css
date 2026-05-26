@@ -131,7 +131,7 @@ body.chamber-page.chamber-ra .ra-goal {
 	padding: 1.25rem;
 	text-align: left;
 	color: #2f2f2f;
-	min-height: 220px;
+	/* min-height: 220px; */
 	display: flex;
 	flex-direction: column;
 	gap: 0.65rem;
