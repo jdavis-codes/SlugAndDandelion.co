@@ -13,6 +13,8 @@ const messageList = document.getElementById("ra-message-list");
 
 let lastRenderedSignature = "";
 let pollingTimer = null;
+let lastFetchedRows = [];
+let lastObservedWidth = 0;
 
 function getAccessPassword() {
   try {
@@ -36,27 +38,109 @@ function redirectToRsvp() {
   window.location.replace("rsvp.html");
 }
 
-function escapeHtml(str) {
+function escapeSvgText(str) {
   return String(str)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
-function formatTime(value) {
+function formatBbsStamp(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString([], {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit"
-  });
+
+  const day = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+  const hour = String(date.getHours()).padStart(2, "0");
+  const minute = String(date.getMinutes()).padStart(2, "0");
+
+  return `${day},${hour}:${minute}`;
+}
+
+function wrapForSvg(text, maxCharsPerLine = 46) {
+  const lines = [];
+  const paragraphs = String(text || "")
+    .replace(/\t/g, "    ")
+    .split(/\r?\n/);
+
+  for (const paragraph of paragraphs) {
+    const normalized = paragraph.replace(/\s+/g, " ").trim();
+    if (!normalized) {
+      lines.push("");
+      continue;
+    }
+
+    let start = 0;
+    while (start < normalized.length) {
+      let end = Math.min(start + maxCharsPerLine, normalized.length);
+      if (end < normalized.length) {
+        const breakAt = normalized.lastIndexOf(" ", end);
+        if (breakAt > start + Math.floor(maxCharsPerLine * 0.45)) {
+          end = breakAt;
+        }
+      }
+
+      const chunk = normalized.slice(start, end).trim();
+      if (chunk) lines.push(chunk);
+
+      start = end;
+      while (normalized[start] === " ") start += 1;
+    }
+  }
+
+  return lines.length ? lines : [""];
+}
+
+function buildKnockoutMessageSvg(row, index, containerWidth) {
+  const width = containerWidth;
+  const left = 12;
+  const fontSize = 15;
+  // IBM Plex Mono at 17px: ~10.2px glyph + 0.5 letter-spacing = ~10.7px per char
+  const maxCharsPerLine = Math.max(20, Math.floor((width - left - 32) / 8.7));
+
+  const stamp = formatBbsStamp(row.created_at);
+  const safeName = String(row.name || "Unknown").replace(/\s+/g, " ").trim() || "Unknown";
+  const safeMessage = String(row.message || "").replace(/\s+/g, " ").trim();
+  const bbsLine = `${stamp ? `${stamp}, ` : ""}${safeName} > ${safeMessage}`.trim();
+  const ariaLabel = escapeSvgText(bbsLine);
+
+  const lines = wrapForSvg(bbsLine, maxCharsPerLine);
+  const lineParts = [];
+  const lineStep = fontSize * 1.35;
+  const minHeight = fontSize * 3;
+  const verticalPadding = fontSize * 0.9;
+  const contentHeight = Math.max(0, (lines.length - 1) * lineStep);
+  const height = Math.max(minHeight, (verticalPadding * 2) + contentHeight);
+  const centerY = height / 2;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const offset = (i - ((lines.length - 1) / 2)) * lineStep;
+    const y = centerY + offset;
+    lineParts.push(`<text x="${left}" y="${y}" dominant-baseline="middle" font-size="${fontSize}" font-family="IBM Plex Mono, SFMono-Regular, Menlo, Consolas, Liberation Mono, monospace" letter-spacing="0.5">${escapeSvgText(lines[i] || " ")}</text>`);
+  }
+
+  const maskId = `ra-msg-mask-${row.id || "x"}-${index}`;
+
+  return `
+    <svg class="ra-message-knockout" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" role="img" aria-label="${ariaLabel}">
+      <defs>
+        <mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${width}" height="${height}">
+          <rect x="0" y="0" width="${width}" height="${height}" fill="#fff"></rect>
+          <g fill="#000">${lineParts.join("")}</g>
+        </mask>
+      </defs>
+      <rect x="0" y="0" width="${width}" height="${height}" fill="#020202" fill-opacity="0.87" mask="url(#${maskId})"></rect>
+    </svg>
+  `.trim();
 }
 
 function renderMessages(rows) {
   if (!messageList) return;
+
+  lastFetchedRows = rows;
+  const orderedRows = [...rows].reverse();
+  const containerWidth = messageList.offsetWidth || 980;
 
   if (!rows.length) {
     lastRenderedSignature = "empty";
@@ -64,17 +148,17 @@ function renderMessages(rows) {
     return;
   }
 
-  const signature = rows.map((row) => `${row.id}:${row.created_at}`).join("|");
+  const signature = `${containerWidth}:` + orderedRows.map((row) => `${row.id}:${row.created_at}`).join("|");
   if (signature === lastRenderedSignature) return;
   lastRenderedSignature = signature;
 
-  messageList.innerHTML = rows.map((row) => `
-    <li>
-      <div class="ra-message-name engraved-text">${escapeHtml(row.name)}</div>
-      <div class="ra-message-body">${escapeHtml(row.message)}</div>
-      <div class="ra-message-time">${escapeHtml(formatTime(row.created_at))}</div>
+  messageList.innerHTML = orderedRows.map((row, index) => `
+    <li class="ra-message-item">
+      ${buildKnockoutMessageSvg(row, index, containerWidth)}
     </li>
   `).join("");
+
+  messageList.scrollTop = messageList.scrollHeight;
 }
 
 async function loadMessages({ silent = false } = {}) {
@@ -133,7 +217,7 @@ if (boardForm) {
     };
 
     if (!payload.name || !payload.message) {
-      if (boardStatus) boardStatus.textContent = "Name and message are required.";
+      if (boardStatus) boardStatus.textContent = "Name + message required.";
       return;
     }
 
@@ -143,15 +227,26 @@ if (boardForm) {
     const { error } = await client.from("ra_messages").insert(payload);
 
     if (error) {
-      if (boardStatus) boardStatus.textContent = `Error: ${error.message}`;
+      if (boardStatus) boardStatus.textContent = `Ra cannot process: ${error.message}`;
       return;
     }
 
     boardForm.reset();
-    if (boardStatus) boardStatus.textContent = "The sun has received your signal.";
+    if (boardStatus) boardStatus.textContent = "Ra has reflected your signal.";
     await loadMessages({ silent: true });
   });
 }
 
 loadMessages();
 startPolling();
+
+if (messageList && window.ResizeObserver) {
+  new ResizeObserver((entries) => {
+    const newWidth = Math.round(entries[0].contentRect.width);
+    if (Math.abs(newWidth - lastObservedWidth) > 4) {
+      lastObservedWidth = newWidth;
+      lastRenderedSignature = "";
+      if (lastFetchedRows.length) renderMessages(lastFetchedRows);
+    }
+  }).observe(messageList);
+}

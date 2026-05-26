@@ -6,7 +6,7 @@
         <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>The Dark Council - Followers of Ra</title>
-        <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap"
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Special+Elite&display=swap"
           rel="stylesheet">
         <link rel="stylesheet"
           href="styles.css">
@@ -32,73 +32,89 @@
                 <div class="ra-copy">
                     <!-- <p class="ra-kicker engraved-text">Inner Chamber of the Sun</p> -->
                     <h1 class="chamber-title"><span class="engraved-text">Followers of Ra</span></h1>
-                    <p class="chamber-sub engraved-text">The chamber burns gold. Step forward only if you mean to be
-                        seen. The eye of noon is above you now.</p>
+                    <p class="chamber-sub engraved-text">The eye of noon is above you now.</p>
 
                     <div class="chamber-body ra-panel">
-                        <p>Your task is to infiltrate and secretly collaborate to bring forth eternal summer, 
-                            and eternal glory to Ra. to do this, you must prevent the ceremony from reaching 
-                            full completion. The dark council members have all been instructed to bring 
-                            sacrifices, herbs, and potions, but have not been told their purpose. Use this knowledge, 
-                            but be extremely careful not to arouse suspicion. the council does not know of Ra's plan... yet.</p>
+                        <p>Your task is to infiltrate and secretly collaborate to bring forth eternal summer,
+                            and eternal glory to Ra. to do this, you must prevent the ceremony from reaching
+                            full completion. The dark council members have all been instructed to bring
+                            sacrifices, herbs, and potions, but have not been told their purpose. Use this knowledge,
+                            but be extremely careful not to arouse suspicion. the council does not know of Ra's plan...
+                            yet.</p>
                     </div>
                 </div>
             </section>
 
             <div class="ra-goals-tracker">
                 <div class="ra-goal">
-                    <h3 class="ra-goal-count"
-                      id="sacrifice-count">0</h3>
+                    <!-- <h3 class="ra-goal-count"
+                      id="sacrifice-count">0</h3> -->
                     <h3>Disillusion the Sacrifices</h3>
                     <p>Convince the three human sacrifices to abandon the ceremony. If they are not present at
                         the final ritual, the ceremony cannot reach full completion.</p>
                 </div>
                 <div class="ra-goal">
-                    <h3 class="ra-goal-count"
-                      id="herb-count">0</h3>
+                    <!-- <h3 class="ra-goal-count"
+                      id="herb-count">0</h3> -->
                     <h3>Collect the Herbs</h3>
                     <p>Obtain the three herbs from the council members.</p>
-                    <span>Herbs</span>
+                    <!-- <span>Herbs</span> -->
                 </div>
                 <div class="ra-goal">
-                    <h3 class="ra-goal-count"
-                      id="potion-count">0</h3>
+                    <!-- <h3 class="ra-goal-count"
+                      id="potion-count">0</h3> -->
                     <h3>Swindle the Potions</h3>
-                    <p>Obtain the three potions from the council members.</p>
-                    <span>Potions</span>
+                    <p>Obtain the entirety of three potion offerings from the council members.</p>
+                    <!-- <span>Potions</span> -->
                 </div>
             </div>
 
-                <section class="ra-board" aria-labelledby="ra-board-title">
-                  <form id="ra-board-form" class="ra-board-form">
-                    <h2 id="ra-board-title"><span class="engraved-text">Whispers to the Sun</span></h2>
-                    <label>Name
-                      <input type="text" name="name" maxlength="80" required />
-                    </label>
-                    <label>Message
-                      <textarea name="message" rows="4" maxlength="280" required></textarea>
-                    </label>
-                    <button type="submit">Send to Ra</button>
-                    <div id="ra-board-status" class="ra-board-status" role="status" aria-live="polite"></div>
-                  </form>
+            <section class="ra-board"
+              aria-label="Ra message board">
+              
+                <div class="ra-board-header">
+                    <h1>Secure SCMP</h1>
+                    <p>[S]un [C]hanneled [M]essaging [P]latform</p>
+                </div>
 
-                  <div class="ra-board-feed">
-                    <h2><span class="engraved-text">Sunlit Signals</span></h2>
-                    <ul id="ra-message-list" class="ra-message-list">
-                      <li class="ra-empty">Listening for whispers...</li>
+                <div class="ra-board-feed">
+                    <ul id="ra-message-list"
+                      class="ra-message-list">
+                        <li class="ra-empty">Listening for whispers...</li>
                     </ul>
-                  </div>
-                </section>
+                </div>
+
+                <form id="ra-board-form"
+                  class="ra-board-form"
+                  autocomplete="off">
+                    <input type="text"
+                      name="name"
+                      maxlength="80"
+                      placeholder="name"
+                      required />
+                    <input type="text"
+                      name="message"
+                      maxlength="280"
+                      placeholder="message"
+                      required />
+                    <button type="submit">send</button>
+                    <div id="ra-board-status"
+                      class="ra-board-status"
+                      role="status"
+                      aria-live="polite"></div>
+                </form>
+            </section>
 
             <div class="back-btn-wrap ra-back-wrap">
                 <a href="rsvp.html"
-                  class="back-btn">&#x2190; Return to RSVP</a>
+                  class="back-btn">&#x2190; Return</a>
             </div>
         </div>
 
         <script src="js/background.js"></script>
-              <script src="js/config.js"></script>
-              <script type="module" src="js/ra.js"></script>
+        <script src="js/config.js"></script>
+        <script type="module"
+          src="js/ra.js"></script>
 
     </body>
 
