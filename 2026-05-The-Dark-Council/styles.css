@@ -241,7 +241,7 @@ body.guestbook-page .eye-widget {
 }
 
 body.rsvp-page .bg-texture,
-body.guestbook-page .bg-texture, 
+body.guestbook-page .bg-texture,
 body.chamber-page .bg-texture {
 	position: fixed;
 	top: 0;
@@ -383,6 +383,7 @@ body.rsvp-page.chamber-denied .content.eye-compact .eye-widget {
 }
 
 @media (min-width: 601px) {
+
 	body.rsvp-page.chamber-denied .eye-widget,
 	body.rsvp-page.chamber-denied .content.eye-compact .eye-widget {
 		width: 650px;
@@ -1090,6 +1091,7 @@ body.chamber-page.chamber-maat .chamber-title {
 		font-size: clamp(1.4rem, 7vw, 2.5rem);
 		letter-spacing: 0.12em;
 	}
+
 	body.rsvp-page .eye-core,
 	body.guestbook-page .eye-core {
 		transform: scale(1.0);
@@ -1111,7 +1113,8 @@ body.chamber-page.chamber-maat .chamber-title {
 	}
 }
 
-.eye-banner-wrapper, .eye-banner-links{
+.eye-banner-wrapper,
+.eye-banner-links {
 	position: absolute;
 	top: 110%;
 	left: 50%;
@@ -1231,6 +1234,12 @@ body.rsvp-page .banner-link.right-link::before {
 		top: 110%;
 		width: 120vw;
 	}
+
+	body.rsvp-page .content.eye-compact .eye-banner-wrapper,
+	body.rsvp-page .content.eye-compact .eye-banner-links {
+		top: 70%;
+	}
+
 
 	/* 
 	body.rsvp-page .banner-link::after {
