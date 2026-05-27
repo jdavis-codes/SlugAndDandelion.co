@@ -1,10 +1,14 @@
 import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
 
 let scene, camera, renderer, eyeGroup;
+let eyeSurfaceEl;
+let lastSurfaceWidth = 0;
+let lastSurfaceHeight = 0;
 
 function initEye() {
     const container = document.getElementById('eye-surface');
     if (!container) return;
+    eyeSurfaceEl = container;
 
     // Set up scene, camera, and renderer
     scene = new THREE.Scene();
@@ -16,9 +20,15 @@ function initEye() {
     camera.position.z = 5;
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(w, h);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h, false);
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
+    renderer.domElement.style.display = 'block';
     container.appendChild(renderer.domElement);
+
+    lastSurfaceWidth = Math.round(w);
+    lastSurfaceHeight = Math.round(h);
 
     // Create the eye group
     eyeGroup = new THREE.Group();
@@ -142,17 +152,27 @@ function onDocumentMouseMove(event) {
 }
 
 function onWindowResize() {
-    const container = document.getElementById('eye-surface');
+    if (!camera || !renderer) return;
+    const container = eyeSurfaceEl || document.getElementById('eye-surface');
     if (!container) return;
-    const w = container.clientWidth;
-    const h = container.clientHeight;
+    const w = Math.round(container.clientWidth);
+    const h = Math.round(container.clientHeight);
+    if (w < 2 || h < 2) return;
+    if (w === lastSurfaceWidth && h === lastSurfaceHeight) return;
+
+    lastSurfaceWidth = w;
+    lastSurfaceHeight = h;
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h, false);
 }
 
 function animate() {
     requestAnimationFrame(animate);
+
+    // Keep camera and drawing buffer in lockstep with CSS-driven eye size changes.
+    onWindowResize();
 
     targetX = mouseX;
     targetY = mouseY;
@@ -215,4 +235,24 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-document.addEventListener('DOMContentLoaded', initEye);
+document.addEventListener('DOMContentLoaded', () => {
+    initEye();
+
+    // ── Scroll-to-compact: shrink eye when user scrolls the inner container ──
+    const scrollEl = document.querySelector('.rsvp-main, .guestbook-main, .chamber-main');
+    const content  = document.querySelector('.content');
+    const eyeWidget = document.querySelector('.eye-widget');
+
+    if (scrollEl && content && eyeWidget) {
+        scrollEl.addEventListener('scroll', () => {
+            content.classList.toggle('eye-compact', scrollEl.scrollTop > 10);
+        }, { passive: true });
+
+        // Re-fit the Three.js canvas after the CSS transition completes
+        eyeWidget.addEventListener('transitionend', (e) => {
+            if (e.propertyName === 'height' || e.propertyName === 'width') {
+                onWindowResize();
+            }
+        });
+    }
+});

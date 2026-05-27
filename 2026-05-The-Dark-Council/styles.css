@@ -244,6 +244,7 @@ body.guestbook-page .eye-widget {
 	height: 250px;
     flex-shrink: 0;
     transform: translateY(-5%);
+	transition: width 0.45s ease, height 0.45s ease;
 }
 
 body.rsvp-page .eye-core,
@@ -253,11 +254,23 @@ body.guestbook-page .eye-core {
 	transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s ease;
 }
 
+body.rsvp-page .content.eye-compact .eye-widget,
+body.guestbook-page .content.eye-compact .eye-widget {
+	width: 200px;
+	height: 125px;
+}
+
 @media (min-width: 601px) {
 	body.rsvp-page .eye-widget,
 	body.guestbook-page .eye-widget {
 		width: 650px;
 		height: 300px;
+	}
+
+	body.rsvp-page .content.eye-compact .eye-widget,
+	body.guestbook-page .content.eye-compact .eye-widget {
+		width: 325px;
+		height: 150px;
 	}
 }
 
@@ -380,7 +393,7 @@ body.rsvp-page .rsvp-main {
 	overflow-x: hidden;
 	overscroll-behavior: contain;
 	-webkit-overflow-scrolling: touch;
-	padding: 0 0 0.5rem;
+	padding: 0.4rem 0 200px;
 	box-sizing: border-box;
 }
 
@@ -396,7 +409,7 @@ body.guestbook-page .guestbook-main {
 	overflow-x: hidden;
 	overscroll-behavior: contain;
 	-webkit-overflow-scrolling: touch;
-	padding: 0 0 0.5rem;
+	padding: 0.4rem 0 200px;
 	box-sizing: border-box;
 }
 
@@ -412,7 +425,7 @@ body.chamber-page .chamber-main {
 	overflow-x: hidden;
 	overscroll-behavior: contain;
 	-webkit-overflow-scrolling: touch;
-	padding: 0 0 0.5rem;
+	padding: 0.5rem 0.8rem 200px;
 	box-sizing: border-box;
 }
 
@@ -421,7 +434,7 @@ body.guestbook-page .form-box {
 	background: rgba(0, 0, 0, 0.6);
 	border: 1px solid #333;
 	padding: 0.7rem;
-	border-radius: 8px;
+	border-radius: 2px;
 	flex: 1;
 	text-align: left;
 	font-size: 0.82em;
@@ -472,7 +485,7 @@ body.guestbook-page .form-box textarea {
 	color: #d8d8d8;
 	font-family: inherit;
 	padding: 0.4rem 0.55rem;
-	border-radius: 4px;
+	border-radius: 2px;
 	margin-top: 0.15rem;
 	width: 100%;
 	box-sizing: border-box;
@@ -504,7 +517,7 @@ body.guestbook-page .form-box button[type="submit"] {
 	padding: 0.35rem;
 	font-family: inherit;
 	cursor: pointer;
-	border-radius: 4px;
+	border-radius: 2px;
 	margin-top: auto;
 	transition: background 0.2s;
 	font-size: 16px;
@@ -665,7 +678,7 @@ body.guestbook-page .back-btn {
 	padding: 0.5rem;
 	background: rgba(0, 0, 0, 0.6);
 	border: 1px solid #444;
-	border-radius: 8px;
+	border-radius: 2px;
 	color: #d8d8d8;
 	font-family: "Special Elite", "Courier New", monospace;
 	font-size: 1.5em;
@@ -706,7 +719,7 @@ body.rsvp-page .chamber-form input {
 	min-width: 0;
 	background: rgba(0, 0, 0, 0.6);
 	border: 1px solid #444;
-	border-radius: 8px;
+	border-radius: 2px;
 	color: #d8d8d8;
 	font-family: "Special Elite", "Courier New", monospace;
 	font-size: 1rem;
@@ -728,7 +741,7 @@ body.rsvp-page .chamber-form input::placeholder {
 body.rsvp-page .chamber-btn {
 	background: rgba(0, 0, 0, 0.6);
 	border: 1px solid #444;
-	border-radius: 8px;
+	border-radius: 2px;
 	color: #d8d8d8;
 	font-family: "Special Elite", "Courier New", monospace;
 	font-size: 1.1em;
@@ -802,12 +815,23 @@ body.chamber-page .eye-widget {
 	flex-shrink: 0;
 	transform: translateY(-5%);
 	touch-action: none;
+	transition: width 0.45s ease, height 0.45s ease;
+}
+
+body.chamber-page .content.eye-compact .eye-widget {
+	width: 200px;
+	height: 125px;
 }
 
 @media (min-width: 601px) {
 	body.chamber-page .eye-widget {
 		width: 650px;
 		height: 300px;
+	}
+
+	body.chamber-page .content.eye-compact .eye-widget {
+		width: 325px;
+		height: 150px;
 	}
 }
 
@@ -864,7 +888,7 @@ body.chamber-page .chamber-sub {
 body.chamber-page .chamber-body {
 	background: rgba(0, 0, 0, 0.6);
 	border: 1px solid #333;
-	border-radius: 8px;
+	border-radius: 2px;
 	padding: 1rem;
 	line-height: 1.5;
 	font-size: 1em;
@@ -883,7 +907,7 @@ body.chamber-page .back-btn {
 	padding: 0.5rem;
 	background: rgba(0, 0, 0, 0.6);
 	border: 1px solid #444;
-	border-radius: 8px;
+	border-radius: 2px;
 	color: #d8d8d8;
 	font-family: "Special Elite", "Courier New", monospace;
 	font-size: 1.5em;
@@ -949,16 +973,18 @@ body.chamber-page.chamber-maat .chamber-title {
 		overflow-x: hidden;
 		overscroll-behavior: contain;
 		-webkit-overflow-scrolling: touch;
-		padding-bottom: 0.35rem;
+		margin-top: -0.35rem;
+		padding: 0.85rem 0 200px;
 	}
 
 	body.guestbook-page .guestbook-main {
 		width: 100%;
-		padding-bottom: 0.35rem;
+		margin-top: -0.35rem;
+		padding: 0.85rem 0 200px;
 	}
 
 	body.chamber-page .chamber-main {
-		padding-bottom: 0.35rem;
+		padding: 0.5rem 0.4rem 200px;
 	}
 
 
