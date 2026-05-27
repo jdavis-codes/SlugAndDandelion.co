@@ -974,7 +974,7 @@ body.chamber-page.chamber-maat .chamber-title {
 		overscroll-behavior: contain;
 		-webkit-overflow-scrolling: touch;
 		margin-top: -0.35rem;
-		padding: 0.85rem 0 200px;
+		padding: 80px 0 200px;
 	}
 
 	body.guestbook-page .guestbook-main {
@@ -984,7 +984,8 @@ body.chamber-page.chamber-maat .chamber-title {
 	}
 
 	body.chamber-page .chamber-main {
-		padding: 0.5rem 0.4rem 200px;
+		margin-top: -0.35rem;
+		padding: 0.95rem 0.4rem 200px;
 	}
 
 
@@ -1063,6 +1064,7 @@ body.chamber-page.chamber-maat .chamber-title {
     width: min(120vw, 950px);
 	z-index: -1;
     pointer-events: none;
+	transition: top 0.45s ease;
 }
 .eye-banner-wrapper img {
     width: 100%;
@@ -1077,6 +1079,7 @@ body.chamber-page.chamber-maat .chamber-title {
 	aspect-ratio: 1024 / 378;
 	z-index: 12;
 	pointer-events: none;
+    transition: top 0.45s ease;
 }
 .banner-link {
     position: absolute;
@@ -1101,7 +1104,7 @@ body.chamber-page.chamber-maat .chamber-title {
 	width: 77vw;
 	z-index: -2;
 	pointer-events: none;
-	filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+	filter: drop-shadow(3px 3px 0px rgba(255, 255, 255, 0.8));
 }
 
 /* smoothly hide banner on key grab */
@@ -1112,14 +1115,15 @@ body.chamber-page.chamber-maat .chamber-title {
 }
 
 @media (max-width: 600px) {
-	.eye-banner-wrapper {
-		top: 82%;
+	.eye-banner-wrapper,
+	.eye-banner-links {
+		top: 110%;
 		width: 120vw;
 	}
 
-	.eye-banner-links {
-		top: 82%;
-		width: 120vw;
+	body.rsvp-page .content.eye-compact .eye-banner-wrapper,
+	body.rsvp-page .content.eye-compact .eye-banner-links {
+		top: 70%;
 	}
 
 	.main-banner {
