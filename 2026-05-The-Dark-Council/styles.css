@@ -1116,7 +1116,7 @@ body.chamber-page.chamber-maat .chamber-title {
 .eye-banner-wrapper,
 .eye-banner-links {
 	position: absolute;
-	top: 110%;
+	top: 61%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	width: min(120vw, 950px);
