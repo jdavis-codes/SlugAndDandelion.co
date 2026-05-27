@@ -18,11 +18,15 @@ body {
 }
 
 @keyframes fadeIn {
-	to { opacity: 0.4; }
+	to {
+		opacity: 0.4;
+	}
 }
 
 @keyframes fadeInText {
-	to { opacity: 1; }
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes chamberWarningPulse {
@@ -30,17 +34,51 @@ body {
 		opacity: 0;
 		transform: translate(-50%, -50%) scale(0.92);
 	}
+
 	20% {
 		opacity: 1;
 		transform: translate(-50%, -50%) scale(1);
 	}
+
 	70% {
 		opacity: 1;
 		transform: translate(-50%, -50%) scale(1.04);
 	}
+
 	100% {
 		opacity: 0;
 		transform: translate(-50%, -50%) scale(1.08);
+	}
+}
+
+@keyframes linkHintPulse {
+	0% {
+		opacity: 0.85;
+		transform: scale(0.72);
+	}
+
+	70% {
+		opacity: 0;
+		transform: scale(1.38);
+	}
+
+	100% {
+		opacity: 0;
+		transform: scale(1.38);
+	}
+}
+
+@keyframes linkHintLabel {
+
+	0%,
+	100% {
+		opacity: 0.75;
+		transform: translateY(0);
+	}
+
+	50% {
+		opacity: 1;
+		transform: translateY(-2px);
 	}
 }
 
@@ -189,7 +227,8 @@ body.home-page footer a {
 
 /* RSVP and Guestbook pages (shared, RSVP-first) */
 body.rsvp-page,
-body.guestbook-page {
+body.guestbook-page,
+body.chamber-page {
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
@@ -202,7 +241,8 @@ body.guestbook-page .eye-widget {
 }
 
 body.rsvp-page .bg-texture,
-body.guestbook-page .bg-texture {
+body.guestbook-page .bg-texture, 
+body.chamber-page .bg-texture {
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -212,9 +252,11 @@ body.guestbook-page .bg-texture {
 	background-size: auto;
 	background-position: center center;
 	background-repeat: no-repeat;
-	opacity: 0;
+	opacity: 1;
 	animation: fadeIn 0.7s ease forwards;
 	z-index: 1;
+	mix-blend-mode: color-burn;
+	filter: invert() brightness(0.1);
 }
 
 body.rsvp-page .content,
@@ -242,14 +284,15 @@ body.guestbook-page .eye-widget {
 	position: relative;
 	width: 400px;
 	height: 250px;
-    flex-shrink: 0;
-    transform: translateY(-5%);
+	flex-shrink: 0;
+	transform: translateY(-5%);
 	transition: width 0.45s ease, height 0.45s ease;
 }
 
 body.rsvp-page .eye-core,
 body.guestbook-page .eye-core {
 	position: absolute;
+	transform: scale(0.85);
 	inset: 0;
 	transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s ease;
 }
@@ -261,6 +304,7 @@ body.guestbook-page .content.eye-compact .eye-widget {
 }
 
 @media (min-width: 601px) {
+
 	body.rsvp-page .eye-widget,
 	body.guestbook-page .eye-widget {
 		width: 650px;
@@ -336,8 +380,8 @@ body.rsvp-page.chamber-denied .eye-core {
 
 body.rsvp-page.chamber-denied .eye-surface {
 	/* filter: brightness(0.01) contrast(1.08) saturate(0.86) hue-rotate(.2); */
-	filter:saturate(10) contrast(1.25) hue-rotate(90deg)
-;	/* filter: invert(); */
+	filter: saturate(10) contrast(1.25) hue-rotate(90deg);
+	/* filter: invert(); */
 }
 
 body.rsvp-page.chamber-denied .eyelids {
@@ -584,32 +628,39 @@ body.guestbook-page .ledger-scroll-container {
 	flex: 1 1 auto;
 	min-height: 0;
 	overflow: hidden;
-	padding-right: 15px; /* space for the rock scrollbar */
+	padding-right: 15px;
+	/* space for the rock scrollbar */
 }
 
 body.guestbook-page #ledger-box .comment-list {
 	padding-bottom: 20px;
 	-webkit-mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent 100%);
 	mask-image: linear-gradient(180deg, #000 calc(100% - 20px), transparent 100%);
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none;    /* Firefox */
+	-ms-overflow-style: none;
+	/* IE and Edge */
+	scrollbar-width: none;
+	/* Firefox */
 }
 
 body.guestbook-page #ledger-box .comment-list::-webkit-scrollbar {
-	display: none; /* Chrome, Safari, Opera */
+	display: none;
+	/* Chrome, Safari, Opera */
 }
 
 .rock-scrollbar {
 	position: relative;
 	width: 14px;
 	margin-left: 5px;
-	margin-right: -10px; /* offset the container padding slightly */
-	margin-bottom: 20px; /* match the mask stopping point roughly */
+	margin-right: -10px;
+	/* offset the container padding slightly */
+	margin-bottom: 20px;
+	/* match the mask stopping point roughly */
 	background: rgba(0, 0, 0, 0.15);
 	box-shadow: inset 1.5px 1.5px 3px rgba(0, 0, 0, 0.6), inset -1px -1px 2px rgba(255, 255, 255, 0.1);
 	border-radius: 7px;
 	visibility: hidden;
 }
+
 .rock-scrollbar.active {
 	visibility: visible;
 }
@@ -626,6 +677,7 @@ body.guestbook-page #ledger-box .comment-list::-webkit-scrollbar {
 	cursor: grab;
 	top: 0;
 }
+
 .rock-thumb:active {
 	cursor: grabbing;
 }
@@ -768,27 +820,6 @@ body.rsvp-page .chamber-err {
 }
 
 /* ── Inner Chamber pages (ra / ma'at) ───────────────────────────────────── */
-body.chamber-page {
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-	background-color: #111;
-}
-
-body.chamber-page .bg-texture {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	background-image: url('assets/wrinkle-texture.png');
-	background-size: auto;
-	background-position: center center;
-	background-repeat: no-repeat;
-	opacity: 0;
-	animation: fadeIn 2s ease forwards;
-	z-index: 1;
-}
 
 body.chamber-page .content {
 	position: relative;
@@ -1039,6 +1070,10 @@ body.chamber-page.chamber-maat .chamber-title {
 		font-size: clamp(1.4rem, 7vw, 2.5rem);
 		letter-spacing: 0.12em;
 	}
+	body.rsvp-page .eye-core,
+	body.guestbook-page .eye-core {
+		transform: scale(1.0);
+	}
 
 	body.rsvp-page.chamber-denied .eye-core {
 		transform: translateY(40%) scale(1.28);
@@ -1056,45 +1091,100 @@ body.chamber-page.chamber-maat .chamber-title {
 	}
 }
 
-.eye-banner-wrapper {
-    position: absolute;
-    top: 65%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: min(120vw, 950px);
-	z-index: -1;
-    pointer-events: none;
-	transition: top 0.45s ease;
-}
-.eye-banner-wrapper img {
-    width: 100%;
-    display: block;
-}
-.eye-banner-links {
+.eye-banner-wrapper, .eye-banner-links{
 	position: absolute;
-	top: 60%;
+	top: 61%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	width: min(120vw, 900px);
+	width: min(120vw, 950px);
+}
+
+.eye-banner-wrapper {
+	z-index: -1;
+	pointer-events: none;
+	transition: top 0.45s ease;
+}
+
+.eye-banner-wrapper img {
+	width: 100%;
+	display: block;
+}
+
+.eye-banner-links {
 	aspect-ratio: 1024 / 378;
 	z-index: 12;
 	pointer-events: none;
-    transition: top 0.45s ease;
+	transition: top 0.45s ease;
 }
+
 .banner-link {
-    position: absolute;
-    top: 20%;
-    height: 60%;
+	position: absolute;
+	top: 20%;
+	height: 60%;
 	width: 40%;
 	z-index: 20;
-    pointer-events: auto;
+	pointer-events: auto;
 }
+
+body.rsvp-page .banner-link::before {
+	content: "";
+	position: absolute;
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	border: 1px solid rgba(243, 229, 193, 0.78);
+	background: rgba(243, 229, 193, 0.18);
+	box-shadow: 0 0 10px rgba(243, 229, 193, 0.5);
+	pointer-events: none;
+	animation: linkHintPulse 1.8s ease-out infinite;
+}
+
+/* body.rsvp-page .banner-link::after {
+	content: "CLICK";
+	position: absolute;
+	padding: 0.08rem 0.34rem;
+	border: 1px solid rgba(243, 229, 193, 0.55);
+	border-radius: 2px;
+	background: rgba(0, 0, 0, 0.62);
+	color: #f3e5c1;
+	font-family: "Special Elite", "Courier New", monospace;
+	font-size: 0.56rem;
+	letter-spacing: 0.1em;
+	line-height: 1.15;
+	white-space: nowrap;
+	pointer-events: none;
+	animation: linkHintLabel 1.8s ease-in-out infinite;
+} */
+
 .banner-link.left-link {
 	left: 5%;
 }
-.banner-link.right-link {
-    right: 5%;
+
+body.rsvp-page .banner-link.left-link::before {
+	right: 41%;
+	bottom: 0%;
 }
+
+/* body.rsvp-page .banner-link.left-link::after {
+	right: 20%;
+	bottom: 8%;
+} */
+
+.banner-link.right-link {
+	right: 5%;
+}
+
+body.rsvp-page .banner-link.right-link::before {
+	left: 41%;
+	bottom: 0%;
+	animation-delay: 0.35s;
+}
+
+/* body.rsvp-page .banner-link.right-link::after {
+	left: 20%;
+	bottom: 8%;
+	animation-delay: 0.35s;
+} */
 
 .main-banner {
 	position: absolute;
@@ -1115,10 +1205,25 @@ body.chamber-page.chamber-maat .chamber-title {
 }
 
 @media (max-width: 600px) {
+
 	.eye-banner-wrapper,
 	.eye-banner-links {
 		top: 110%;
 		width: 120vw;
+	}
+
+	/* 
+	body.rsvp-page .banner-link::after {
+		content: "TAP";
+		font-size: 0.5rem;
+		letter-spacing: 0.08em;
+	} */
+
+	body.rsvp-page .banner-link::before {
+		content: "";
+		position: absolute;
+		width: 40px;
+		height: 40px;
 	}
 
 	body.rsvp-page .content.eye-compact .eye-banner-wrapper,
@@ -1130,5 +1235,5 @@ body.chamber-page.chamber-maat .chamber-title {
 		width: 120vw;
 		top: 30%;
 	}
-	
+
 }

@@ -40,6 +40,33 @@ keyFrontEl.style.transition = 'opacity 0.35s ease';
 keyFrontEl.draggable = false;
 keyEl.parentNode.appendChild(keyFrontEl);
 
+const keyholeZoomEl = document.createElement('img');
+keyholeZoomEl.src = 'assets/keyhole.svg';
+keyholeZoomEl.style.position = 'fixed';
+keyholeZoomEl.style.left = '0';
+keyholeZoomEl.style.top = '0';
+keyholeZoomEl.style.width = '0';
+keyholeZoomEl.style.height = '0';
+keyholeZoomEl.style.transformOrigin = '50% 50%';
+keyholeZoomEl.style.transform = 'translate(-50%, -50%) scale(1)';
+keyholeZoomEl.style.opacity = '0';
+keyholeZoomEl.style.pointerEvents = 'none';
+keyholeZoomEl.style.zIndex = '1000';
+keyholeZoomEl.style.willChange = 'transform, opacity';
+keyholeZoomEl.style.backfaceVisibility = 'hidden';
+keyholeZoomEl.draggable = false;
+document.documentElement.appendChild(keyholeZoomEl);
+
+const transitionOverlayEl = document.createElement('div');
+transitionOverlayEl.style.position = 'fixed';
+transitionOverlayEl.style.inset = '0';
+transitionOverlayEl.style.background = '#000';
+transitionOverlayEl.style.opacity = '0';
+transitionOverlayEl.style.pointerEvents = 'none';
+transitionOverlayEl.style.zIndex = '9999';
+transitionOverlayEl.style.willChange = 'opacity';
+document.documentElement.appendChild(transitionOverlayEl);
+
 // Unlock state
 let insertHeldStart = null;
 let unlocking = false;
@@ -50,7 +77,15 @@ let frontRotation = 0;
 let transitioning = false;
 let transitionStartTime = null;
 let hasRedirected = false;
-const TRANSITION_DURATION = 3000; // ms — page transition duration
+const ZOOM_DURATION = 1200; // ms — straight-shot zoom duration
+const BLACKOUT_DURATION = 1100; // ms — fade to full black early in the shot
+const ZOOM_EASING = 'cubic-bezier(1, 0.09, 0.85, 0.94)'; // slow start, accelerating finish
+const TRANSITION_DURATION = ZOOM_DURATION;
+
+let lastKeyholeCenterX = null;
+let lastKeyholeCenterY = null;
+let lastKeyholeWidth = null;
+let lastKeyholeHeight = null;
 
 const HOLD_BEFORE_UNLOCK = 1800; // ms — hold fully inserted before turning starts
 const UNLOCK_DURATION    = 5000; // ms — time to rotate 180°
@@ -143,8 +178,12 @@ function animateFrontProxy() {
   const fullyInserted = insertDepth > 0.92;
 
   // Track keyhole position (20% above its center)
-  if (keyholeEl) {
+  if (!transitioning && keyholeEl) {
     const khRect = keyholeEl.getBoundingClientRect();
+    lastKeyholeCenterX = khRect.left + khRect.width / 2;
+    lastKeyholeCenterY = khRect.top + khRect.height / 2;
+    lastKeyholeWidth = khRect.width;
+    lastKeyholeHeight = khRect.height;
     keyFrontEl.style.top = `${khRect.top + khRect.height / 2 - khRect.height * 0.2}px`;
     keyFrontEl.style.left = `${khRect.left + khRect.width / 2}px`;
   }
@@ -178,22 +217,60 @@ function animateFrontProxy() {
     if (progress >= 1) {
       unlocked = true;
       document.body.classList.add('unlocked-mode');
-      
+
       // Start page transition
       transitioning = true;
       transitionStartTime = performance.now();
-      
-      // Fade out interactables
-      keyEl.style.transition = 'opacity 2s ease, transform 2s ease';
-      keyEl.style.opacity = '0';
-      keyholeEl.style.transition = 'opacity 2s ease, transform 2s ease';
-      keyholeEl.style.opacity = '0';
-      keyFrontEl.style.transition = 'opacity 2s ease, transform 2s ease';
+
+      // Zoom to infinity centered on the keyhole
+      let kx = lastKeyholeCenterX;
+      let ky = lastKeyholeCenterY;
+      let kw = lastKeyholeWidth;
+      let kh = lastKeyholeHeight;
+      if (kx == null || ky == null || kw == null || kh == null) {
+        const holeRect = keyholeEl.getBoundingClientRect();
+        kx = holeRect.left + holeRect.width / 2;
+        ky = holeRect.top + holeRect.height / 2;
+        kw = holeRect.width;
+        kh = holeRect.height;
+      }
+
       keyFrontEl.style.opacity = '0';
-      keyThicknessLayers.forEach(layer => {
-         layer.style.transition = 'opacity 2s ease';
-         layer.style.opacity = '0';
+      keyFrontEl.style.display = 'none';
+      keyEl.style.display = 'none';
+      keyThicknessLayers.forEach((layer) => {
+        layer.style.display = 'none';
       });
+
+      keyholeZoomEl.style.left = `${kx}px`;
+      keyholeZoomEl.style.top = `${ky}px`;
+      keyholeZoomEl.style.width = `${kw}px`;
+      keyholeZoomEl.style.height = `${kh}px`;
+      keyholeZoomEl.style.transform = 'translate(-50%, -50%) scale(1)';
+      keyholeZoomEl.style.opacity = '1';
+
+      keyholeEl.style.opacity = '0';
+      keyholeEl.style.display = 'none';
+
+      document.body.style.willChange = 'transform';
+      document.body.style.transformOrigin = `${kx}px ${ky}px`;
+      requestAnimationFrame(() => {
+        document.body.style.transition = `transform ${ZOOM_DURATION}ms ${ZOOM_EASING}`;
+        document.body.style.transform = 'scale(30)';
+
+        keyholeZoomEl.style.transition = `transform ${ZOOM_DURATION}ms ${ZOOM_EASING}`;
+        keyholeZoomEl.style.transform = 'translate(-50%, -50%) scale(30)';
+
+        transitionOverlayEl.style.transition = `opacity ${BLACKOUT_DURATION}ms linear`;
+        transitionOverlayEl.style.opacity = '1';
+      });
+
+      setTimeout(() => {
+        if (!hasRedirected) {
+          hasRedirected = true;
+          window.location.href = 'rsvp.html';
+        }
+      }, ZOOM_DURATION + 20);
     }
   }
 
@@ -203,12 +280,13 @@ function animateFrontProxy() {
 
   // Handle post-unlock transition
   if (transitioning) {
-    const p = Math.min(1, (performance.now() - transitionStartTime) / TRANSITION_DURATION);
-    const eased = p * p * (3 - 2 * p);
-    if (typeof window.bgSetTransition === 'function') {
+    const elapsed = performance.now() - transitionStartTime;
+    if (elapsed < BLACKOUT_DURATION && typeof window.bgSetTransition === 'function') {
+      const p = Math.min(1, elapsed / BLACKOUT_DURATION);
+      const eased = p * p * (3 - 2 * p);
       window.bgSetTransition(eased);
     }
-    if (p >= 1) {
+    if (elapsed >= TRANSITION_DURATION) {
       if (!hasRedirected) {
         hasRedirected = true;
         window.location.href = 'rsvp.html';
@@ -218,7 +296,7 @@ function animateFrontProxy() {
   }
 
   // Drive shader radial waves and zoom center
-  if (typeof window.bgSetWave === 'function' && keyholeEl) {
+  if (!transitioning && typeof window.bgSetWave === 'function' && keyholeEl) {
     const rect = keyholeEl.getBoundingClientRect();
     const cx = (rect.left + rect.width  / 2) / window.innerWidth;
     const cy = 1 - (rect.top + rect.height / 2 - rect.height * 0.2) / window.innerHeight; // flip for GL
@@ -228,6 +306,8 @@ function animateFrontProxy() {
 }
 
 function animateKey() {
+  if (transitioning) return;
+
   // Spring physics constants
   const stiffness = 0.06;
   const damping = 0.85;
@@ -287,6 +367,8 @@ function animateKey() {
 let pulsePhase = 0;
 
 function animateKeyhole() {
+  if (transitioning) return;
+
   if (isDragging && keyholeEl) {
     const keyRect = keyEl.getBoundingClientRect();
     const holeRect = keyholeEl.getBoundingClientRect();
@@ -328,6 +410,10 @@ function animateKeyhole() {
 }
 
 function animate() {
+  if (transitioning && transitionStartTime && performance.now() - transitionStartTime >= BLACKOUT_DURATION) {
+    return;
+  }
+
   animateKey();
   animateKeyhole();
   animateFrontProxy();
