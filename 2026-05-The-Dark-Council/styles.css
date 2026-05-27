@@ -1113,7 +1113,7 @@ body.chamber-page.chamber-maat .chamber-title {
 
 .eye-banner-wrapper, .eye-banner-links{
 	position: absolute;
-	top: 61%;
+	top: 110%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	width: min(120vw, 950px);
@@ -1228,7 +1228,7 @@ body.rsvp-page .banner-link.right-link::before {
 
 	.eye-banner-wrapper,
 	.eye-banner-links {
-		top: 61%;
+		top: 110%;
 		width: 120vw;
 	}
 
