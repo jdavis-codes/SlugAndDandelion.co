@@ -372,6 +372,20 @@ body.rsvp-page .chamber-warning {
 	line-height: 1.2;
 }
 
+body.rsvp-page.chamber-denied .eye-widget,
+body.rsvp-page.chamber-denied .content.eye-compact .eye-widget {
+	width: 400px;
+	height: 250px;
+}
+
+@media (min-width: 601px) {
+	body.rsvp-page.chamber-denied .eye-widget,
+	body.rsvp-page.chamber-denied .content.eye-compact .eye-widget {
+		width: 650px;
+		height: 300px;
+	}
+}
+
 body.rsvp-page.chamber-denied .eye-core {
 	transform: translateY(34%) scale(1.72);
 	filter: drop-shadow(0 0 20px rgba(244, 21, 43, 0.798));
