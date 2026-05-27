@@ -73,7 +73,7 @@ if (form && input) {
       return;
     }
 
-    const password = String(input.value || "").trim();
+    const password = String(input.value || "").trim().toLowerCase();
     if (!password) {
       if (err) err.textContent = "";
       triggerDenialState("");
