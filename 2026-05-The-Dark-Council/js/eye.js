@@ -12,6 +12,9 @@ let supabaseClient = null;
 let realtimeChannel = null;
 const CHANNEL_NAME = 'eye-tracking';
 const EVENT_NAME = 'mouse-move';
+const TWITCH_EVENT_NAME = 'toggle-twitch';
+
+let watcherTwitchEnabled = false;
 
 // Throttle broadcast to avoid hitting rate limits
 let lastBroadcastTime = 0;
@@ -141,8 +144,8 @@ function onDocumentTouchMove(event) {
     const windowHalfY = window.innerHeight / 2;
     const normalizedX = (touch.clientX - windowHalfX) / windowHalfX;
     const normalizedY = (touch.clientY - windowHalfY) / windowHalfY;
-    const maxRotY = 0.3;
-    const maxRotX = 0.15;
+    const maxRotY = 0.6;
+    const maxRotX = 0.25;
     mouseX = normalizedX * maxRotY;
     mouseY = normalizedY * maxRotX;
 
@@ -160,8 +163,8 @@ function onDocumentMouseMove(event) {
     const normalizedY = (event.clientY - windowHalfY) / windowHalfY;
     
     // Apply rotation limits (in radians)
-    const maxRotY = 0.5; // limit for left/right
-    const maxRotX = 0.15; // limit for up/down
+    const maxRotY = 0.8; // limit for left/right
+    const maxRotX = 0.3; // limit for up/down
     
     mouseX = normalizedX * maxRotY;
     mouseY = normalizedY * maxRotX;
@@ -213,17 +216,17 @@ function animate() {
             eyeGroup.rotation.y = (eyeGroup.rotation.y - Math.sin(time) * 0.05) % (Math.PI * 2);
             // eyeGroup.rotation.z = (eyeGroup.rotation.z + Math.cos(time * 0.7) * 0.05) % (Math.PI * 2);
         } else {
-            // Fast lerp for cursor tracking
-            eyeGroup.rotation.y += (targetX - eyeGroup.rotation.y) * 0.9;
-            eyeGroup.rotation.x += (targetY - eyeGroup.rotation.x) * 0.9;
+            // Smooth lerp for cursor tracking (slower lerp in watcher mode to interpolate 50ms broadcast steps beautifully)
+            const lerpFactor = currentMode === 'watcher' ? 0.08 : 0.15;
+            eyeGroup.rotation.y += (targetX - eyeGroup.rotation.y) * lerpFactor;
+            eyeGroup.rotation.x += (targetY - eyeGroup.rotation.x) * lerpFactor;
             eyeGroup.rotation.z += (0 - eyeGroup.rotation.z) * 0.1;
 
-            // Occasionally fire a twitch impulse (only if not in watcher mode, or let watcher have its own twitches)
-            // Let's disable twitch in watcher mode so it exactly mirrors the controller's movements
-            if (currentMode !== 'watcher') {
+            // Occasionally fire a twitch impulse (only if not in watcher mode, or let watcher have its own twitches if enabled)
+            if (currentMode !== 'watcher' || watcherTwitchEnabled) {
                 if (Math.random() < 0.004) {
-                    twitchTargetX += (Math.random() - 0.5) * 1.78;
-                    twitchTargetY += (Math.random() - 0.5) * 1.74;
+                    twitchTargetX += (Math.random() - 0.5) * 0.356; // halved again (was 0.712)
+                    twitchTargetY += (Math.random() - 0.5) * 0.348; // halved again (was 0.696)
                     twitchIsDwelling = false;
                     twitchDwellUntil = 0;
                     // twitchTargetX = THREE.MathUtils.clamp(twitchTargetX, -0.24, 0.24);
@@ -299,6 +302,7 @@ function setupRealtimeControls() {
     const btnLocal = document.getElementById('btn-local');
     const btnController = document.getElementById('btn-controller');
     const btnWatcher = document.getElementById('btn-watcher');
+    const btnTwitch = document.getElementById('btn-twitch');
     const statusEl = document.getElementById('status');
 
     // If we are on the dedicated eye-watch.html page, force watcher mode automatically
@@ -310,6 +314,11 @@ function setupRealtimeControls() {
                 if (payload && payload.payload) {
                     targetX = payload.payload.x;
                     targetY = payload.payload.y;
+                }
+            });
+            realtimeChannel.on('broadcast', { event: TWITCH_EVENT_NAME }, (payload) => {
+                if (payload && payload.payload) {
+                    watcherTwitchEnabled = payload.payload.enabled;
                 }
             });
             realtimeChannel.subscribe();
@@ -331,6 +340,11 @@ function setupRealtimeControls() {
         btnLocal.classList.toggle('active', mode === 'local');
         btnController.classList.toggle('active', mode === 'controller');
         btnWatcher.classList.toggle('active', mode === 'watcher');
+
+        // Show/hide twitch button based on mode
+        if (btnTwitch) {
+            btnTwitch.style.display = (mode === 'controller') ? 'inline-block' : 'none';
+        }
 
         // Clean up existing channel
         if (realtimeChannel) {
@@ -359,6 +373,12 @@ function setupRealtimeControls() {
                     targetY = payload.payload.y;
                 }
             });
+
+            realtimeChannel.on('broadcast', { event: TWITCH_EVENT_NAME }, (payload) => {
+                if (payload && payload.payload) {
+                    watcherTwitchEnabled = payload.payload.enabled;
+                }
+            });
         }
 
         realtimeChannel.subscribe((status) => {
@@ -373,6 +393,20 @@ function setupRealtimeControls() {
     btnLocal.addEventListener('click', () => setMode('local'));
     btnController.addEventListener('click', () => setMode('controller'));
     btnWatcher.addEventListener('click', () => setMode('watcher'));
+
+    if (btnTwitch) {
+        btnTwitch.addEventListener('click', () => {
+            watcherTwitchEnabled = !watcherTwitchEnabled;
+            btnTwitch.classList.toggle('active', watcherTwitchEnabled);
+            if (realtimeChannel && currentMode === 'controller') {
+                realtimeChannel.send({
+                    type: 'broadcast',
+                    event: TWITCH_EVENT_NAME,
+                    payload: { enabled: watcherTwitchEnabled }
+                });
+            }
+        });
+    }
 
     // Default to local mode
     setMode('local');
