@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>The Dark Council - Eye</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            color: #d8d8d8;
+            font-family: "Special Elite", "Courier New", monospace;
+        }
+
+        /* Fullscreen eye container */
+        .eye-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+
+        .eye-widget {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            aspect-ratio: 1.8 / 1;
+            touch-action: none;
+        }
+
+        .eye-core {
+            position: absolute;
+            inset: 0;
+        }
+
+        .eye-surface {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            -webkit-mask-image: url('assets/eyemaks.svg');
+            -webkit-mask-size: contain;
+            -webkit-mask-position: center;
+            -webkit-mask-repeat: no-repeat;
+            mask-image: url('assets/eyemaks.svg');
+            mask-size: contain;
+            mask-position: center;
+            mask-repeat: no-repeat;
+        }
+
+        .eyelids {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('assets/eyelids.svg');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* Overlay controls */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .controls button {
+            background: #1a1a1a;
+            color: #d8d8d8;
+            border: 1px solid #555;
+            padding: 5px 10px;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 2px;
+            font-size: 0.85rem;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .controls button:hover {
+            background: #333;
+            border-color: #888;
+        }
+
+        .controls button.active {
+            background: #9b111e;
+            border-color: #ff4d4d;
+            color: #fff;
+        }
+
+        .status-indicator {
+            font-size: 0.8rem;
+            color: #888;
+            margin-left: 5px;
+        }
+
+        .status-indicator.connected {
+            color: #00ff66;
+        }
+    </style>
+    <script type="module" src="js/eye.js?v=__ASSET_VERSION__"></script>
+</head>
+<body>
+    <div class="eye-container">
+        <div class="eye-widget">
+            <div class="eye-core">
+                <div id="eye-surface" class="eye-surface"></div>
+                <div class="eyelids"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="btn-local" class="active">Local</button>
+        <button id="btn-controller">Controller</button>
+        <button id="btn-watcher">Watcher</button>
+        <span id="status" class="status-indicator">Offline</span>
+    </div>
+
+    <script src="js/config.js?v=__ASSET_VERSION__"></script>
+</body>
+</html>

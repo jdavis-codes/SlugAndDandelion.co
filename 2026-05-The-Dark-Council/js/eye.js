@@ -1,9 +1,21 @@
 import * as THREE from 'https://unpkg.com/three@0.158.0/build/three.module.js';
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 let scene, camera, renderer, eyeGroup;
 let eyeSurfaceEl;
 let lastSurfaceWidth = 0;
 let lastSurfaceHeight = 0;
+
+// Realtime sync variables
+let currentMode = 'local'; // 'local', 'controller', 'watcher'
+let supabaseClient = null;
+let realtimeChannel = null;
+const CHANNEL_NAME = 'eye-tracking';
+const EVENT_NAME = 'mouse-move';
+
+// Throttle broadcast to avoid hitting rate limits
+let lastBroadcastTime = 0;
+const BROADCAST_INTERVAL = 50; // ms (20 fps is plenty for smooth lerp)
 
 function initEye() {
     const container = document.getElementById('eye-surface');
@@ -133,6 +145,10 @@ function onDocumentTouchMove(event) {
     const maxRotX = 0.15;
     mouseX = normalizedX * maxRotY;
     mouseY = normalizedY * maxRotX;
+
+    if (currentMode === 'controller') {
+        broadcastPosition(mouseX, mouseY);
+    }
 }
 
 function onDocumentMouseMove(event) {
@@ -149,6 +165,10 @@ function onDocumentMouseMove(event) {
     
     mouseX = normalizedX * maxRotY;
     mouseY = normalizedY * maxRotX;
+
+    if (currentMode === 'controller') {
+        broadcastPosition(mouseX, mouseY);
+    }
 }
 
 function onWindowResize() {
@@ -174,8 +194,12 @@ function animate() {
     // Keep camera and drawing buffer in lockstep with CSS-driven eye size changes.
     onWindowResize();
 
-    targetX = mouseX;
-    targetY = mouseY;
+    // In watcher mode, targetX and targetY are updated via Realtime broadcast,
+    // so we do not overwrite them with local mouse coordinates.
+    if (currentMode !== 'watcher') {
+        targetX = mouseX;
+        targetY = mouseY;
+    }
 
     // Smooth rotation towards cursor using linear interpolation
     // Notice that a negative rotation around X points the eye up/down correctly
@@ -194,41 +218,44 @@ function animate() {
             eyeGroup.rotation.x += (targetY - eyeGroup.rotation.x) * 0.9;
             eyeGroup.rotation.z += (0 - eyeGroup.rotation.z) * 0.1;
 
-            // Occasionally fire a twitch impulse
-            if (Math.random() < 0.004) {
-                twitchTargetX += (Math.random() - 0.5) * 1.78;
-                twitchTargetY += (Math.random() - 0.5) * 1.74;
-                twitchIsDwelling = false;
-                twitchDwellUntil = 0;
-                // twitchTargetX = THREE.MathUtils.clamp(twitchTargetX, -0.24, 0.24);
-                // twitchTargetY = THREE.MathUtils.clamp(twitchTargetY, -0.2, 0.2);
-            }
-
-            // Smoothly ease the twitch up toward its target, pause briefly, then back down to rest
-            twitchX += (twitchTargetX - twitchX) * 0.16;
-            twitchY += (twitchTargetY - twitchY) * 0.16;
-
-            const hasTwitchTarget = Math.abs(twitchTargetX) > 0.001 || Math.abs(twitchTargetY) > 0.001;
-            const reachedTwitchTarget = Math.abs(twitchTargetX - twitchX) < 0.01 && Math.abs(twitchTargetY - twitchY) < 0.01;
-
-            if (!twitchIsDwelling && hasTwitchTarget && reachedTwitchTarget) {
-                twitchIsDwelling = true;
-                twitchDwellUntil = performance.now() + 80 + Math.random() * 320;
-            }
-
-            if (twitchIsDwelling) {
-                if (performance.now() >= twitchDwellUntil) {
+            // Occasionally fire a twitch impulse (only if not in watcher mode, or let watcher have its own twitches)
+            // Let's disable twitch in watcher mode so it exactly mirrors the controller's movements
+            if (currentMode !== 'watcher') {
+                if (Math.random() < 0.004) {
+                    twitchTargetX += (Math.random() - 0.5) * 1.78;
+                    twitchTargetY += (Math.random() - 0.5) * 1.74;
                     twitchIsDwelling = false;
+                    twitchDwellUntil = 0;
+                    // twitchTargetX = THREE.MathUtils.clamp(twitchTargetX, -0.24, 0.24);
+                    // twitchTargetY = THREE.MathUtils.clamp(twitchTargetY, -0.2, 0.2);
                 }
-            }
 
-            if (!twitchIsDwelling) {
-                twitchTargetX += (0 - twitchTargetX) * 0.12;
-                twitchTargetY += (0 - twitchTargetY) * 0.12;
-            }
+                // Smoothly ease the twitch up toward its target, pause briefly, then back down to rest
+                twitchX += (twitchTargetX - twitchX) * 0.16;
+                twitchY += (twitchTargetY - twitchY) * 0.16;
 
-            eyeGroup.rotation.y += twitchX;
-            eyeGroup.rotation.x += twitchY;
+                const hasTwitchTarget = Math.abs(twitchTargetX) > 0.001 || Math.abs(twitchTargetY) > 0.001;
+                const reachedTwitchTarget = Math.abs(twitchTargetX - twitchX) < 0.01 && Math.abs(twitchTargetY - twitchY) < 0.01;
+
+                if (!twitchIsDwelling && hasTwitchTarget && reachedTwitchTarget) {
+                    twitchIsDwelling = true;
+                    twitchDwellUntil = performance.now() + 80 + Math.random() * 320;
+                }
+
+                if (twitchIsDwelling) {
+                    if (performance.now() >= twitchDwellUntil) {
+                        twitchIsDwelling = false;
+                    }
+                }
+
+                if (!twitchIsDwelling) {
+                    twitchTargetX += (0 - twitchTargetX) * 0.12;
+                    twitchTargetY += (0 - twitchTargetY) * 0.12;
+                }
+
+                eyeGroup.rotation.y += twitchX;
+                eyeGroup.rotation.x += twitchY;
+            }
         }
     }
 
@@ -237,6 +264,15 @@ function animate() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initEye();
+
+    // Initialize Supabase Realtime if config is present
+    const cfg = window.SD_CONFIG || {};
+    if (cfg.supabaseUrl && cfg.supabaseAnonKey) {
+        supabaseClient = createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+    }
+
+    // Setup UI controls if we are on the eye.html page
+    setupRealtimeControls();
 
     // ── Scroll-to-compact: shrink eye when user scrolls the inner container ──
     const scrollEl = document.querySelector('.rsvp-main, .guestbook-main, .chamber-main');
@@ -256,3 +292,102 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ── Realtime Sync Functions ──────────────────────────────────────────────────
+
+function setupRealtimeControls() {
+    const btnLocal = document.getElementById('btn-local');
+    const btnController = document.getElementById('btn-controller');
+    const btnWatcher = document.getElementById('btn-watcher');
+    const statusEl = document.getElementById('status');
+
+    // If we are on the dedicated eye-watch.html page, force watcher mode automatically
+    if (document.body.classList.contains('watcher-page')) {
+        currentMode = 'watcher';
+        if (supabaseClient) {
+            realtimeChannel = supabaseClient.channel(CHANNEL_NAME);
+            realtimeChannel.on('broadcast', { event: EVENT_NAME }, (payload) => {
+                if (payload && payload.payload) {
+                    targetX = payload.payload.x;
+                    targetY = payload.payload.y;
+                }
+            });
+            realtimeChannel.subscribe();
+        }
+        return;
+    }
+
+    if (!btnLocal || !btnController || !btnWatcher) return; // Not on eye.html or eye-watch.html
+
+    const updateStatus = (text, isConnected) => {
+        if (statusEl) {
+            statusEl.textContent = text;
+            statusEl.className = 'status-indicator' + (isConnected ? ' connected' : '');
+        }
+    };
+
+    const setMode = async (mode) => {
+        currentMode = mode;
+        btnLocal.classList.toggle('active', mode === 'local');
+        btnController.classList.toggle('active', mode === 'controller');
+        btnWatcher.classList.toggle('active', mode === 'watcher');
+
+        // Clean up existing channel
+        if (realtimeChannel) {
+            await supabaseClient.removeChannel(realtimeChannel);
+            realtimeChannel = null;
+        }
+
+        if (mode === 'local') {
+            updateStatus('Offline', false);
+            return;
+        }
+
+        if (!supabaseClient) {
+            updateStatus('Config Error', false);
+            return;
+        }
+
+        updateStatus('Connecting...', false);
+
+        realtimeChannel = supabaseClient.channel(CHANNEL_NAME);
+
+        if (mode === 'watcher') {
+            realtimeChannel.on('broadcast', { event: EVENT_NAME }, (payload) => {
+                if (payload && payload.payload) {
+                    targetX = payload.payload.x;
+                    targetY = payload.payload.y;
+                }
+            });
+        }
+
+        realtimeChannel.subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                updateStatus(mode.charAt(0).toUpperCase() + mode.slice(1) + ' (Connected)', true);
+            } else {
+                updateStatus('Disconnected', false);
+            }
+        });
+    };
+
+    btnLocal.addEventListener('click', () => setMode('local'));
+    btnController.addEventListener('click', () => setMode('controller'));
+    btnWatcher.addEventListener('click', () => setMode('watcher'));
+
+    // Default to local mode
+    setMode('local');
+}
+
+function broadcastPosition(x, y) {
+    if (!realtimeChannel || currentMode !== 'controller') return;
+
+    const now = performance.now();
+    if (now - lastBroadcastTime < BROADCAST_INTERVAL) return;
+    lastBroadcastTime = now;
+
+    realtimeChannel.send({
+        type: 'broadcast',
+        event: EVENT_NAME,
+        payload: { x, y }
+    });
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>The Dark Council - Eye Watcher</title>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            color: #d8d8d8;
+            font-family: "Special Elite", "Courier New", monospace;
+        }
+
+        /* Fullscreen eye container */
+        .eye-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+            box-sizing: border-box;
+            padding: 20px;
+        }
+
+        .eye-widget {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            aspect-ratio: 1.8 / 1;
+            touch-action: none;
+        }
+
+        .eye-core {
+            position: absolute;
+            inset: 0;
+        }
+
+        .eye-surface {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            -webkit-mask-image: url('assets/eyemaks.svg');
+            -webkit-mask-size: contain;
+            -webkit-mask-position: center;
+            -webkit-mask-repeat: no-repeat;
+            mask-image: url('assets/eyemaks.svg');
+            mask-size: contain;
+            mask-position: center;
+            mask-repeat: no-repeat;
+        }
+
+        .eyelids {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('assets/eyelids.svg');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 2;
+        }
+    </style>
+    <script type="module" src="js/eye.js?v=__ASSET_VERSION__"></script>
+</head>
+<body class="watcher-page">
+    <div class="eye-container">
+        <div class="eye-widget">
+            <div class="eye-core">
+                <div id="eye-surface" class="eye-surface"></div>
+                <div class="eyelids"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js?v=__ASSET_VERSION__"></script>
+</body>
+</html>
