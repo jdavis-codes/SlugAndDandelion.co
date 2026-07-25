@@ -5,8 +5,9 @@ const jerseyInput = document.getElementById("jersey-number");
 const reserveBtn = document.querySelector('.reserve-btn[form="rsvp-form"]');
 const confettiLayer = document.getElementById("confetti");
 const DRAFT_KEY = "sd_sports_rsvp_draft_v1";
+const SUBMITTED_KEY = "sd_sports_rsvp_submitted_v1";
 
-const DEFAULT_BUTTON_TEXT = reserveBtn?.textContent?.trim() || "Reserve your spot";
+let defaultButtonText = reserveBtn?.textContent?.trim() || "Reserve your spot";
 let loadingTimer = null;
 let resetTimer = null;
 let supabaseClient = null;
@@ -44,10 +45,33 @@ async function loadConfigFromFile() {
 }
 
 if (rsvpForm) {
+  if (hasSubmittedReservation()) {
+    defaultButtonText = "Edit reservation";
+    if (reserveBtn) reserveBtn.textContent = defaultButtonText;
+  }
+
   hydrateDraft();
   rsvpForm.addEventListener("input", persistDraft);
   if (jerseyInput) jerseyInput.addEventListener("input", persistDraft);
   rsvpForm.addEventListener("submit", onSubmit);
+}
+
+function hasSubmittedReservation() {
+  try {
+    return localStorage.getItem(SUBMITTED_KEY) === "1";
+  } catch (_) {
+    return false;
+  }
+}
+
+function markSubmittedReservation() {
+  try {
+    localStorage.setItem(SUBMITTED_KEY, "1");
+  } catch (_) {
+    // Ignore storage failures.
+  }
+
+  defaultButtonText = "Edit reservation";
 }
 
 function readDraft() {
@@ -114,7 +138,7 @@ function clearLoadingAnimation() {
 function scheduleReset() {
   if (resetTimer) clearTimeout(resetTimer);
   resetTimer = setTimeout(() => {
-    setButtonState("", DEFAULT_BUTTON_TEXT);
+    setButtonState("", defaultButtonText);
   }, 2600);
 }
 
@@ -204,6 +228,7 @@ function normalizeJersey() {
 
 async function onSubmit(event) {
   event.preventDefault();
+  const wasSubmittedBefore = hasSubmittedReservation();
 
   let cfg = getConfig();
 
@@ -249,7 +274,8 @@ async function onSubmit(event) {
   }
 
   persistDraft();
+  markSubmittedReservation();
 
   launchConfetti();
-  showButtonMessage("success", "Reservation secured");
+  showButtonMessage("success", wasSubmittedBefore ? "Reservation updated" : "Reservation secured");
 }
