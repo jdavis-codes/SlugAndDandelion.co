@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ── Update this each month ──────────────────────────────────────────────────
-CURRENT_MONTH="2026-05-The-Dark-Council"
+CURRENT_MONTH="2026-08-SPORTS"
 # ────────────────────────────────────────────────────────────────────────────
 
 if [ -n "${CF_PAGES_COMMIT_SHA:-}" ]; then
