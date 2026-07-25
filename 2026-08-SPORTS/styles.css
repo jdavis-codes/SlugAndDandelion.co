@@ -53,7 +53,7 @@ h4 {
 	display: grid;
 	grid-template-columns: 106px calc(100% - 106px);
 	font-family: var(--font-body);
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+	/* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); */
 }
 
 .ticket-sub {
