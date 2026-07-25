@@ -18,7 +18,20 @@ const commentList   = document.getElementById("comment-list");
 // ── Load comments on page load ───────────────────────────────────────────────
 async function loadComments() {
   if (!cfg.supabaseUrl) {
-    if (commentList) commentList.innerHTML = "<li style=\"color:#666;\">Config missing.</li>";
+    if (!commentList) return;
+    try {
+      const resp = await fetch("data/comments.json");
+      const data = await resp.json();
+      if (!data.length) { commentList.innerHTML = "<li style=\"color:#666;\">. . . </li>"; return; }
+      commentList.innerHTML = "";
+      data.forEach(row => {
+        const li = document.createElement("li");
+        li.innerHTML = `<span class="comment-name engraved-text">${escapeHtml(row.name)}:</span> <span class="comment-body engraved-text">${escapeHtml(row.comment)}</span>`;
+        commentList.appendChild(li);
+      });
+    } catch (_) {
+      commentList.innerHTML = "<li style=\"color:#666;\">Archive data unavailable.</li>";
+    }
     return;
   }
   const sb = makeClient();
@@ -77,6 +90,8 @@ if (commentForm) {
     }
   });
 }
+
+if (!cfg.supabaseUrl && commentForm) commentForm.style.display = "none";
 
 function escapeHtml(str) {
   return String(str)

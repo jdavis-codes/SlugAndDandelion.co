@@ -49,9 +49,17 @@ function triggerDenialState(originalText) {
   }, 2800);
 }
 
+const ARCHIVE_PASSWORDS = { "ra": "sun", "maat": "sacrifice" };
+
 async function resolveChamberDestination(password) {
   const trimmedPassword = String(password || "").trim();
-  if (!trimmedPassword || !cfg.supabaseUrl || !cfg.supabaseAnonKey) return null;
+  if (!trimmedPassword) return null;
+
+  if (!cfg.supabaseUrl) {
+    const keyName = ARCHIVE_PASSWORDS[trimmedPassword.toLowerCase()];
+    if (!keyName) return null;
+    return CHAMBER_DESTINATIONS.find(c => c.keyName === keyName) || null;
+  }
 
   const client = makeClient(trimmedPassword);
 

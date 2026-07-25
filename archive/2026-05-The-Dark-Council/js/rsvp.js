@@ -19,7 +19,23 @@ const attendeeList = document.getElementById("attendee-list");
 // ── Load attendees on page load ───────────────────────────────────────────────
 async function loadAttendees() {
   if (!cfg.supabaseUrl) {
-    if (attendeeList) attendeeList.innerHTML = "<li style=\"color:#666;\">Config missing.</li>";
+    if (!attendeeList) return;
+    try {
+      const resp = await fetch("data/rsvps.json");
+      const data = await resp.json();
+      const attending = data.filter(r => r.attending === "yes" || r.attending === "maybe");
+      if (!attending.length) { attendeeList.innerHTML = "<li style=\"color:#666;\">. . .</li>"; return; }
+      attendeeList.innerHTML = "";
+      attending.forEach(row => {
+        const li = document.createElement("li");
+        const guests = row.guests > 0 ? ` +${row.guests}` : "";
+        const msg = row.message ? ` — "${row.message}"` : "";
+        li.textContent = `${row.name}${guests}${msg}`;
+        attendeeList.appendChild(li);
+      });
+    } catch (_) {
+      attendeeList.innerHTML = "<li style=\"color:#666;\">Archive data unavailable.</li>";
+    }
     return;
   }
   const sb = makeClient();
@@ -45,6 +61,7 @@ async function loadAttendees() {
 }
 
 loadAttendees();
+if (!cfg.supabaseUrl && rsvpForm) rsvpForm.style.display = "none";
 
 // ── RSVP submit ───────────────────────────────────────────────────────────────
 if (rsvpForm) {

@@ -162,6 +162,17 @@ function renderMessages(rows) {
 }
 
 async function loadMessages({ silent = false } = {}) {
+  if (!cfg.supabaseUrl) {
+    try {
+      const resp = await fetch("data/ra_messages.json");
+      const data = await resp.json();
+      renderMessages(data || []);
+      if (boardStatus) boardStatus.textContent = "";
+    } catch (_) {
+      if (boardStatus) boardStatus.textContent = "Archive data unavailable.";
+    }
+    return;
+  }
   const password = getAccessPassword();
   if (!password || !cfg.supabaseUrl || !cfg.supabaseAnonKey) {
     if (!silent && boardStatus) boardStatus.textContent = "Sun access required.";
@@ -238,7 +249,8 @@ if (boardForm) {
 }
 
 loadMessages();
-startPolling();
+if (cfg.supabaseUrl) startPolling();
+if (!cfg.supabaseUrl && boardForm) boardForm.style.display = "none";
 
 if (messageList && window.ResizeObserver) {
   new ResizeObserver((entries) => {

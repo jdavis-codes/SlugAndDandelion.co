@@ -1262,3 +1262,14 @@ body.rsvp-page .banner-link.right-link::before {
 	}
 
 }
+
+/* ── Archive: size ledger-box to match rock image aspect ratio ────────────────── */
+body.guestbook-page .forms-container {
+	justify-content: center;
+}
+
+body.guestbook-page #ledger-box {
+	flex: 0 0 auto;
+	aspect-ratio: 540 / 332;
+	max-height: 240px;
+}

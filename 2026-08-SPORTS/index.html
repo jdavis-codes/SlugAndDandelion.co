@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPORTS — Slug &amp; Dandelion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/baseball-club-solid" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="ticket">
+        <section class="ticket-sub">
+            <h3>Admit One</h3>
+            <p>No 06900666</p>
+        </section>
+
+        <section class="ticket-main">
+            <section class="ticket-seat">
+                <h3><span class="jersey-number"><span class="jersey-label">Jersey</span><span class="jersey-hash">#</span><input id="jersey-number" class="jersey-number-input" name="jersey_number" form="rsvp-form" type="text" inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2" value="00" aria-label="Jersey number" /></span></h3>
+                <div class="ticket-seat-box">
+                    <p>Section</p>
+                    <h4>SB</h4>
+                </div>
+                <div class="ticket-seat-box">
+                    <p>Box</p>
+                    <h4>9</h4>
+                </div>
+                <div class="ticket-seat-box">
+                    <p>Seat</p>
+                    <h4>69</h4>
+                </div>
+            </section>
+
+            <section class="ticket-info">
+                <div class="ticket-info-event">
+                    <div class="ticket-info-brand">
+                        <h3>Slug &amp; Dandelion Stadiums</h3>
+                        <p>World Series Grand Prix Cup Finals</p>
+                    </div>
+
+                    <div class="ticket-info-teams">
+                        <div class="team toasters">
+                            <span class="coach">Coach Cinnamon Toast</span>
+                            <span class="name">The Toasters</span>
+                        </div>
+                        <div class="separator">VS</div>
+                        <div class="team poppers">
+                            <span class="coach">Coach Popcorn</span>
+                            <span class="name">The Poppers</span>
+                        </div>
+                    </div>
+
+                    <div class="ticket-info-location">
+                        <span>Stadium:</span>
+                        <span>100 Tremont St, Salem MA, 01970</span>
+                    </div>
+
+                    <div class="ticket-info-date">
+                        <p>Saturday August 15th, 3PM Sharp</p>
+                    </div>
+                </div>
+
+                <div class="ticket-info-rsvp-wrap">
+                    <form class="ticket-info-rsvp" id="rsvp-form" autocomplete="off">
+                        <div class="rsvp-row">
+                            <label>
+                                Athlete
+                                <input type="text" name="name" placeholder="Your name" required />
+                            </label>
+                            <label class="guests">
+                                Guests
+                                <input type="number" name="guests" min="0" value="0" />
+                            </label>
+                        </div>
+
+                        <div class="rsvp-row dotted">
+                            <label>
+                                Phone
+                                <input type="tel" name="phone" placeholder="000-000-0000" />
+                            </label>
+                            <label>
+                                Email
+                                <input type="email" name="email" placeholder="you@example.com" />
+                            </label>
+                        </div>
+
+                        <label class="rsvp-message">
+                            Message to the Stadium Hosts (James+Sully)
+                            <input type="text" name="message" placeholder="Go team!" />
+                        </label>
+                    </form>
+
+                    <div class="ticket-info-misc">
+                        <p>*Skill at sports not required. Guests must be cool.</p>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <button type="submit" form="rsvp-form" class="reserve-btn">Reserve your spot</button>
+
+    <script src="js/config.js"></script>
+</body>
+</html>
