@@ -14,15 +14,23 @@ create table if not exists public.sports_rsvps (
   phone         text                 check (phone is null or char_length(phone) <= 30),
   email         text                 check (email is null or char_length(email) <= 120),
   message       text                 check (message is null or char_length(message) <= 280),
-  section       text        not null default 'SB' check (char_length(section) <= 10),
-  box           text        not null default '9' check (char_length(box) <= 10),
-  seat          text        not null default '69' check (char_length(seat) <= 10),
+  crowd_message text                 check (crowd_message is null or char_length(crowd_message) <= 32),
+  section       text        not null default 'L' check (section ~ '^(L|M|R)$'),
+  box           text        not null default 'A' check (box ~ '^[A-D]$'),
+  seat          text        not null default '1' check (seat ~ '^[1-4]$'),
   jersey_number text        not null default '00' check (jersey_number ~ '^[0-9]{1,2}$')
 );
 
+alter table public.sports_rsvps
+  add column if not exists crowd_message text check (crowd_message is null or char_length(crowd_message) <= 32);
+
+create unique index if not exists sports_rsvps_unique_seat
+on public.sports_rsvps (section, box, seat)
+where section ~ '^(L|M|R)$' and box ~ '^[A-D]$' and seat ~ '^[1-4]$';
+
 alter table public.sports_rsvps enable row level security;
 
-grant select, insert on public.sports_rsvps to anon, authenticated;
+grant select, insert, update on public.sports_rsvps to anon, authenticated;
 grant usage, select on sequence public.sports_rsvps_id_seq to anon, authenticated;
 
 drop policy if exists "Public read sports rsvps" on public.sports_rsvps;
@@ -35,6 +43,13 @@ drop policy if exists "Public insert sports rsvps" on public.sports_rsvps;
 create policy "Public insert sports rsvps"
 on public.sports_rsvps for insert
 to anon, authenticated
+with check (true);
+
+drop policy if exists "Public update sports rsvps" on public.sports_rsvps;
+create policy "Public update sports rsvps"
+on public.sports_rsvps for update
+to anon, authenticated
+using (true)
 with check (true);
 
 -- ── Site counter ─────────────────────────────────────────────────────────────

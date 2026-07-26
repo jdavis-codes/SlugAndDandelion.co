@@ -7,6 +7,10 @@
 	--color-bg: #263238;
 	--color-toasters: #f26522;
 	--color-poppers: #1e88e5;
+	--color-reserve-underlay: #41709c;
+	--color-seat-open: #ffffff;
+	--color-seat-selected: #ffd166;
+	--color-seat-reserved: #d9dee2;
 	--color-jersey-input: #e6e6e6;
 	--color-jersey-input-placeholder: #f2f2f2;
 	--color-jersey-input-focus: #ffffff;
@@ -44,16 +48,48 @@ h4 {
 	letter-spacing: 2px;
 }
 
+.ticket-sub a[x-apple-data-detectors],
+.ticket-sub a[x-apple-data-detectors]:link,
+.ticket-sub a[x-apple-data-detectors]:visited,
+.ticket-sub a[x-apple-data-detectors]:hover,
+.ticket-sub a[x-apple-data-detectors]:active {
+	color: inherit !important;
+	font: inherit !important;
+	line-height: inherit !important;
+	text-decoration: none !important;
+}
+
 .ticket {
+	--ticket-stub-width: 106px;
+	--ticket-main-side-pad: 10px;
+	--ticket-seat-ratio: 0.23;
+	--ticket-left-zone-width: calc(var(--ticket-stub-width) + var(--ticket-main-side-pad) + ((100% - var(--ticket-stub-width) - (var(--ticket-main-side-pad) * 2)) * var(--ticket-seat-ratio)));
 	background-color: var(--color-primary);
 	color: var(--color-secondary);
 	width: 800px;
 	max-width: 100%;
 	height: auto;
 	display: grid;
-	grid-template-columns: 106px calc(100% - 106px);
+	grid-template-columns: var(--ticket-stub-width) calc(100% - var(--ticket-stub-width));
 	font-family: var(--font-body);
+	position: relative;
+	overflow: hidden;
 	/* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); */
+}
+
+.ticket-stadium-logo {
+	position: absolute;
+	top: 50%;
+	left: calc(var(--ticket-left-zone-width) / 2);
+	width: calc(var(--ticket-left-zone-width) * 1.3);
+	max-width: 420px;
+	height: auto;
+	opacity: 0.1;
+	transform: translate(-50%, -50%) rotate(90deg);
+	transform-origin: center;
+	pointer-events: none;
+	user-select: none;
+	z-index: 1;
 }
 
 .ticket-sub {
@@ -88,6 +124,7 @@ h4 {
 	font-size: 30px;
 	padding: 10px 8px 10px 4px;
 	background: var(--color-tertiary);
+    opacity: 0.8;
 	color: white;
 }
 
@@ -142,6 +179,8 @@ h4 {
 	padding: 10px;
 	display: grid;
 	grid-template-columns: 23% 77%;
+	position: relative;
+	z-index: 1;
 }
 
 .ticket-seat {
@@ -160,6 +199,7 @@ h4 {
 	text-orientation: sideways;
 	padding: 12px 10px 12px 2px;
 	background-color: var(--color-tertiary);
+    opacity: 0.8;
 	color: white;
 	position: relative;
 	z-index: 1;
@@ -171,16 +211,17 @@ h4 {
 .ticket-seat > h3 .jersey-number {
 	position: absolute;
 	bottom: 4px;
-	right: calc(50% + 1px);
+	left: 0;
+	right: auto;
 	width: 100%;
 	color: white;
-	padding: 10px 4px;
+	padding: 10px 0 10px 6px;
 	font-size: 1.6em;
 	z-index: 2;
-	transform: translateX(50%);
+	transform: none;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	justify-content: flex-start;
 	gap: 1px;
 }
 
@@ -192,7 +233,7 @@ h4 {
 
 .ticket-seat > h3 .jersey-number-input {
 	block-size: 1.8ch;
-	inline-size: 1.85em;
+	inline-size: 4.625em;
 	border: none;
 	outline: none;
 	background: transparent;
@@ -203,7 +244,7 @@ h4 {
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: inherit;
-	text-align: center;
+	text-align: left;
 	padding: 0;
 	margin: 0;
 	line-height: 1;
@@ -227,6 +268,17 @@ h4 {
 	writing-mode: vertical-rl;
 	text-orientation: sideways;
 	text-align: center;
+}
+
+.ticket-seat > .ticket-seat-box.seat-picker-trigger {
+	cursor: pointer;
+	transition: background-color 0.18s ease;
+}
+
+.ticket-seat > .ticket-seat-box.seat-picker-trigger:hover,
+.ticket-seat > .ticket-seat-box.seat-picker-trigger:focus-visible {
+	background-color: rgba(255, 255, 255, 0.35);
+	outline: none;
 }
 
 .ticket-seat > .ticket-seat-box:not(:last-child) {
@@ -447,6 +499,27 @@ h4 {
 	margin-top: 4px;
 }
 
+.ticket-info-rsvp .rsvp-row.rsvp-row-messages {
+	margin-top: 4px;
+	align-items: flex-start;
+}
+
+.ticket-info-rsvp .rsvp-row.rsvp-row-messages .rsvp-message {
+	margin-top: 0;
+}
+
+.ticket-info-rsvp .rsvp-row.rsvp-row-messages .rsvp-message.crowd-message {
+	margin-top: 0;
+	padding-top: 0;
+	border-top: none;
+}
+
+.ticket-info-rsvp .rsvp-message.crowd-message {
+	margin-top: 8px;
+	padding-top: 6px;
+	border-top: 2px dotted var(--color-secondary);
+}
+
 .ticket-info .ticket-info-misc {
 	font-size: 9px;
 	align-self: center;
@@ -455,6 +528,230 @@ h4 {
 	letter-spacing: 3px;
 	padding: 6px 10px;
 	border-top: 2px dashed var(--color-secondary);
+}
+
+.bleachers-board {
+	background-color: var(--color-primary);
+	color: var(--color-secondary);
+	width: min(1240px, calc(100vw - 40px));
+	max-width: none;
+	margin-top: 18px;
+	padding: 14px;
+	box-shadow: inset 0 0 0 2px var(--color-secondary);
+}
+
+.bleachers-board .bleachers-board-head {
+	margin-bottom: 10px;
+	text-align: left;
+}
+
+.bleachers-board .bleachers-board-head h3 {
+	font-size: 20px;
+	line-height: 1;
+}
+
+.bleachers-board .bleachers-board-head p {
+	font-size: 12px;
+	font-weight: 600;
+	margin-top: 4px;
+	letter-spacing: 0.6px;
+}
+
+.bleachers-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.bleacher-section {
+	background: #f7f7f7;
+	border: 2px solid var(--color-secondary);
+	padding: 8px;
+	overflow: visible;
+}
+
+.bleacher-section-title {
+	font-family: var(--font-heading);
+	font-size: 16px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	margin-bottom: 6px;
+	text-align: center;
+}
+
+.bleacher-row {
+	display: grid;
+	grid-template-columns: 22px repeat(4, minmax(0, 1fr));
+	gap: 6px;
+	align-items: stretch;
+	margin-bottom: 6px;
+	overflow: visible;
+}
+
+.bleacher-row:last-child {
+	margin-bottom: 0;
+}
+
+.bleacher-row-label {
+	font-family: var(--font-heading);
+	font-size: 12px;
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: #ececec;
+	border: 1px solid #c8c8c8;
+}
+
+.bleacher-seat {
+	min-height: 46px;
+	border: 1px solid var(--color-secondary);
+	background: var(--color-seat-open);
+	padding: 2px;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 2px;
+	font-family: var(--font-body);
+	color: var(--color-secondary);
+	line-height: 1.1;
+	position: relative;
+	overflow: visible;
+}
+
+button.bleacher-seat {
+	cursor: pointer;
+	transition: transform 0.12s ease, background-color 0.18s ease;
+}
+
+button.bleacher-seat:hover:not(:disabled),
+button.bleacher-seat:focus-visible:not(:disabled) {
+	background-color: #fff4d5;
+	transform: translateY(-1px);
+	outline: none;
+}
+
+button.bleacher-seat:disabled {
+	cursor: not-allowed;
+	opacity: 1;
+}
+
+.bleacher-seat.is-selected {
+	background: var(--color-seat-selected);
+	border-width: 2px;
+	border-color: var(--color-secondary);
+	animation: selected-seat-outline-pulse 1.2s ease-in-out infinite;
+}
+
+.bleacher-seat.is-reserved {
+	background: var(--color-seat-reserved);
+}
+
+.bleacher-seat-name {
+	font-size: 11px;
+	font-weight: 700;
+	max-width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.bleacher-seat-bubble {
+	position: absolute;
+	top: auto;
+	bottom: calc(100% - 12px);
+	right: auto;
+	left: 5%;
+	width: max-content;
+	min-width: 76px;
+	max-width: 125%;
+	padding: 4px 4px;
+	background: #ffffff;
+	border: 1px solid var(--color-secondary);
+	border-radius: 3px;
+	font-size: 9px;
+	font-weight: 700;
+	line-height: 1;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.16);
+	z-index: 3;
+	pointer-events: none;
+	text-align: left;
+	white-space: normal;
+	overflow-wrap: break-word;
+}
+
+.bleacher-seat-bubble::after {
+	content: "";
+	position: absolute;
+	left: 8px;
+	bottom: -3px;
+	width: 5px;
+	height: 5px;
+	background: #ffffff;
+	border-right: 1px solid var(--color-secondary);
+	border-bottom: 1px solid var(--color-secondary);
+	transform: rotate(45deg);
+}
+
+.seat-picker-modal {
+	position: fixed;
+	inset: 0;
+	display: none;
+	z-index: 90;
+}
+
+.seat-picker-modal[aria-hidden="false"] {
+	display: block;
+}
+
+.seat-picker-backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.58);
+}
+
+.seat-picker-dialog {
+	position: relative;
+	z-index: 1;
+	width: min(860px, calc(100% - 28px));
+	margin: 6vh auto 0;
+	background: var(--color-primary);
+	color: var(--color-secondary);
+	padding: 16px;
+	box-shadow: 0 16px 32px rgba(0, 0, 0, 0.32);
+	border: 3px solid var(--color-secondary);
+}
+
+.seat-picker-dialog h3 {
+	font-size: 28px;
+	line-height: 1;
+	margin-bottom: 2px;
+}
+
+.seat-picker-subtitle {
+	font-size: 12px;
+	font-weight: 600;
+	margin-bottom: 10px;
+}
+
+.seat-picker-close {
+	float: right;
+	border: 2px solid var(--color-secondary);
+	background: white;
+	color: var(--color-secondary);
+	padding: 4px 10px;
+	font-family: var(--font-heading);
+	font-size: 14px;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+body.seat-picker-open {
+	overflow: hidden;
 }
 
 .reserve-btn {
@@ -470,9 +767,10 @@ h4 {
 	text-transform: uppercase;
 	color: white;
 	background-color: var(--color-toasters);
+	background-image: linear-gradient(135deg, var(--color-toasters) 0 50%, var(--color-poppers) 50% 100%);
 	border: 3px solid white;
 	cursor: pointer;
-	box-shadow: 0 6px 0 var(--color-poppers);
+	box-shadow: 0 6px 0 var(--color-reserve-underlay);
 	position: relative;
 	overflow: hidden;
 	transition: transform 0.05s ease, box-shadow 0.05s ease;
@@ -480,12 +778,12 @@ h4 {
 
 .reserve-btn:hover {
 	transform: translateY(2px);
-	box-shadow: 0 4px 0 var(--color-poppers);
+	box-shadow: 0 4px 0 var(--color-reserve-underlay);
 }
 
 .reserve-btn:active {
 	transform: translateY(6px);
-	box-shadow: 0 0 0 var(--color-poppers);
+	box-shadow: 0 0 0 var(--color-reserve-underlay);
 }
 
 .reserve-btn.is-loading {
@@ -510,11 +808,13 @@ h4 {
 }
 
 .reserve-btn.is-success {
+	background-image: none;
 	background-color: var(--color-poppers);
 	box-shadow: 0 6px 0 #165da0;
 }
 
 .reserve-btn.is-error {
+	background-image: none;
 	background-color: #892b2b;
 	box-shadow: 0 6px 0 #5a1b1b;
 }
@@ -571,6 +871,23 @@ h4 {
 	}
 }
 
+@keyframes selected-seat-outline-pulse {
+	0%,
+	100% {
+		box-shadow: inset 0 0 0 1px var(--color-secondary), 0 0 0 0 rgba(242, 101, 34, 0);
+	}
+	50% {
+		box-shadow: inset 0 0 0 1px var(--color-secondary), 0 0 0 3px rgba(242, 101, 34, 0.85);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.bleacher-seat.is-selected {
+		animation: none;
+		box-shadow: inset 0 0 0 1px var(--color-secondary), 0 0 0 2px rgba(242, 101, 34, 0.6);
+	}
+}
+
 @media (max-width: 820px) {
 	.ticket {
 		grid-template-columns: 100%;
@@ -578,11 +895,31 @@ h4 {
 		width: 100%;
 	}
 
+	.ticket-stadium-logo {
+		display: block;
+		left: 50%;
+		top: auto;
+		bottom: -14px;
+		width: min(80%, 360px);
+		max-width: none;
+		transform: translateX(-50%) rotate(0deg);
+		opacity: 0.14;
+	}
+
 	.ticket-main {
 		grid-column: 1;
 		grid-row: 1;
 		grid-template-columns: 100%;
 		padding: 8px;
+	}
+
+	.ticket-main > .ticket-info {
+		order: 1;
+	}
+
+	.ticket-main > .ticket-seat {
+		order: 2;
+		margin-top: 8px;
 	}
 
 	.ticket-sub {
@@ -682,13 +1019,16 @@ h4 {
 
 	.ticket-seat > h3 .jersey-number {
 		position: static;
-		display: inline-flex;
+		display: flex;
+		width: 100%;
+		justify-content: flex-start;
 		transform: none;
 		padding: 0;
 	}
 
 	.ticket-seat > h3 .jersey-number-input {
-		width: 2.4ch;
+		width: 5ch;
+		text-align: left;
 	}
 
 	.ticket-seat > .ticket-seat-box {
@@ -704,16 +1044,58 @@ h4 {
 
 	.ticket-info {
 		padding-left: 0;
-		margin-top: 8px;
+		margin-top: 0;
 		gap: 8px;
 	}
 
 	.ticket-info .ticket-info-teams .team .name {
-		font-size: 22px;
+		font-size: 18px;
 	}
 
 	.ticket-info .ticket-info-date {
-		font-size: 20px;
+		font-size: 18px;
 		border-bottom: 2px solid var(--color-secondary);
+	}
+
+    .ticket-info .ticket-info-location span {
+        font-size: 1px;
+    }
+
+    .ticket-info .ticket-info-location span:last-child {
+        font-size: 16px;
+    }
+
+	.ticket-info-rsvp .rsvp-row.rsvp-row-messages {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 6px;
+	}
+
+	.ticket-info-rsvp .rsvp-row.rsvp-row-messages .rsvp-message {
+		width: 100%;
+	}
+
+	.ticket-info-rsvp .rsvp-row.rsvp-row-messages.dotted label:first-child {
+		border-right: none;
+		padding-right: 0;
+	}
+
+	.bleachers-board {
+		margin-top: 14px;
+		padding: 12px;
+	}
+
+	.bleachers-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.seat-picker-dialog {
+		margin-top: 3vh;
+		width: calc(100% - 18px);
+		padding: 12px;
+	}
+
+	.bleacher-seat {
+		min-height: 42px;
 	}
 }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no, date=no, email=no, address=no">
     <title>SPORTS — Slug &amp; Dandelion</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/baseball-club-solid" rel="stylesheet">
@@ -10,6 +11,8 @@
 </head>
 <body>
     <main class="ticket">
+        <img class="ticket-stadium-logo" src="assets/Stadium_logo_2.svg" alt="" aria-hidden="true" />
+
         <section class="ticket-sub">
             <h3>Admit One</h3>
             <p>No 06900666</p>
@@ -17,18 +20,18 @@
 
         <section class="ticket-main">
             <section class="ticket-seat">
-                <h3><span class="jersey-number"><span class="jersey-label">Jersey</span><span class="jersey-hash">#</span><input id="jersey-number" class="jersey-number-input" name="jersey_number" form="rsvp-form" type="text" inputmode="numeric" pattern="[0-9]{1,2}" maxlength="2" value="00" aria-label="Jersey number" /></span></h3>
-                <div class="ticket-seat-box">
+                <h3><span class="jersey-number"><span class="jersey-label">Jersey</span><span class="jersey-hash">#</span><input id="jersey-number" class="jersey-number-input" name="jersey_number" form="rsvp-form" type="text" inputmode="numeric" pattern="[0-9]*" value="00" aria-label="Jersey number" /></span></h3>
+                <div class="ticket-seat-box seat-picker-trigger" data-open-seat-picker tabindex="0" role="button" aria-label="Choose section, row, and seat">
                     <p>Section</p>
-                    <h4>SB</h4>
+                    <h4 id="seat-display-section">L</h4>
                 </div>
-                <div class="ticket-seat-box">
-                    <p>Box</p>
-                    <h4>9</h4>
+                <div class="ticket-seat-box seat-picker-trigger" data-open-seat-picker tabindex="0" role="button" aria-label="Choose section, row, and seat">
+                    <p>Row</p>
+                    <h4 id="seat-display-row">A</h4>
                 </div>
-                <div class="ticket-seat-box">
+                <div class="ticket-seat-box seat-picker-trigger" data-open-seat-picker tabindex="0" role="button" aria-label="Choose section, row, and seat">
                     <p>Seat</p>
-                    <h4>69</h4>
+                    <h4 id="seat-display-seat">1</h4>
                 </div>
             </section>
 
@@ -41,7 +44,7 @@
 
                     <div class="ticket-info-teams">
                         <div class="team toasters">
-                            <span class="coach">Coach Cinnamon Toast</span>
+                            <span class="coach">Coach C-Toast</span>
                             <span class="name">The Toasters</span>
                         </div>
                         <div class="separator">VS</div>
@@ -63,11 +66,11 @@
 
                 <div class="ticket-info-rsvp-wrap">
                     <form class="ticket-info-rsvp" id="rsvp-form" autocomplete="off">
-                        <input type="hidden" name="section" value="SB" />
-                        <input type="hidden" name="box" value="9" />
-                        <input type="hidden" name="seat" value="69" />
+                        <input type="hidden" name="section" value="L" />
+                        <input type="hidden" name="box" value="A" />
+                        <input type="hidden" name="seat" value="1" />
 
-                        <div class="rsvp-row">
+                        <div class="rsvp-row dotted">
                             <label>
                                 Athlete
                                 <input type="text" name="name" placeholder="Your name" required />
@@ -89,10 +92,17 @@
                             </label>
                         </div>
 
-                        <label class="rsvp-message">
-                            Message to the Stadium Hosts (James+Sully)
-                            <input type="text" name="message" placeholder="Go team!" />
-                        </label>
+                        <div class="rsvp-row rsvp-row-messages dotted">
+                            <label class="rsvp-message">
+                                Message to the Hosts
+                                <input type="text" name="message" placeholder="Swing Batter!" />
+                            </label>
+
+                            <label class="rsvp-message crowd-message">
+                                Message to the Crowd
+                                <input type="text" name="crowd_message" maxlength="32" placeholder="Let's get this bread!" />
+                            </label>
+                        </div>
                     </form>
 
                     <div class="ticket-info-misc">
@@ -104,6 +114,25 @@
     </main>
 
     <button type="submit" form="rsvp-form" class="reserve-btn">Reserve your spot</button>
+
+    <section class="bleachers-board" aria-labelledby="bleachers-board-title">
+        <div class="bleachers-board-head">
+            <h3 id="bleachers-board-title">The Bench</h3>
+            <p>Are you watching the game? are you playing it? Who knows!!</p>
+        </div>
+        <div id="bleachers-board-grid" class="bleachers-grid" aria-live="polite"></div>
+    </section>
+
+    <div id="seat-picker-modal" class="seat-picker-modal" aria-hidden="true">
+        <div class="seat-picker-backdrop" data-close-seat-picker></div>
+        <div class="seat-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="seat-picker-title">
+            <button type="button" class="seat-picker-close" data-close-seat-picker aria-label="Close seat picker">Close</button>
+            <h3 id="seat-picker-title">Choose Your Seat</h3>
+            <p class="seat-picker-subtitle">Sections L, M, R with rows A-D and seats 1-4.</p>
+            <div id="seat-picker-grid" class="bleachers-grid"></div>
+        </div>
+    </div>
+
     <div id="confetti" aria-hidden="true"></div>
 
     <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.js"></script>
