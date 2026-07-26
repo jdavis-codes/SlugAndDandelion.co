@@ -332,6 +332,9 @@ function wireFoamFingerSpinEffect() {
   if (stacks.length === 0) return;
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const notifySpinStateChange = () => {
+      window.dispatchEvent(new CustomEvent("foam-finger-spin-state-change"));
+    };
 
   const triggerSpin = (stack) => {
     for (const other of stacks) {
@@ -343,6 +346,7 @@ function wireFoamFingerSpinEffect() {
     stack.classList.remove("is-spinning");
     void stack.offsetWidth;
     stack.classList.add("is-spinning");
+      notifySpinStateChange();
   };
 
   const triggerGloveConfetti = (stack) => {
@@ -376,6 +380,7 @@ function wireFoamFingerSpinEffect() {
     const card = stack.querySelector(".foam-finger-card");
     card?.addEventListener("animationend", () => {
       stack.classList.remove("is-spinning");
+        notifySpinStateChange();
     });
   }
 }
@@ -448,6 +453,13 @@ function wireScrolljack3DEffect() {
         const gloveWave = Math.sin(y * 0.006) * (isMobile ? 32 : 88);
 
       gloveStacks.forEach((stack, index) => {
+          if (stack.classList.contains("is-spinning")) {
+            stack.style.setProperty("--scroll-glove-rotate-x", "0deg");
+            stack.style.setProperty("--scroll-glove-rotate-y", "0deg");
+            stack.style.setProperty("--scroll-glove-depth", "0px");
+            return;
+          }
+
         const direction = index === 0 ? -1 : 1;
         const gloveRotateY = gloveWave * direction;
 
@@ -463,6 +475,12 @@ function wireScrolljack3DEffect() {
     ticking = true;
     window.requestAnimationFrame(apply);
   };
+
+    const onSpinStateChange = () => {
+      queueApply();
+    };
+
+    window.addEventListener("foam-finger-spin-state-change", onSpinStateChange);
 
     const addDesktopListeners = () => {
       if (desktopListenersBound) return;

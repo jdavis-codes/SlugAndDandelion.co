@@ -86,6 +86,8 @@ h4 {
 	display: inline-block;
 	height: 100%;
 	transform-style: preserve-3d;
+	transform: perspective(1200px) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth));
+	transition: transform 180ms linear;
 	will-change: transform;
 }
 
@@ -95,12 +97,12 @@ h4 {
 
 .foam-finger-stack-left {
 	left: -12vw;
-	transform: translateY(-55%) rotate(-8deg) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth));
+	transform: translateY(-55%) rotate(-8deg);
 }
 
 .foam-finger-stack-right {
 	right: -12vw;
-	transform: translateY(-55%) scaleX(-1) rotate(-8deg) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth));
+	transform: translateY(-55%) scaleX(-1) rotate(-8deg);
 }
 
 .foam-finger {
@@ -124,13 +126,13 @@ h4 {
 	top: 56%;
 	width: 44%;
 	height: auto;
-	opacity: 0.5;
+	opacity: 0.8;
 	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.24));
 	z-index: 2;
 }
 
 .foam-finger-mark-left {
-	transform: translate(-50%, 25%) scaleX(1) scale(1.6);
+	transform: translate(-40%, 25%) scaleX(1) scale(1.6);
 }
 
 .foam-finger-mark-right {
@@ -139,33 +141,33 @@ h4 {
 
 @keyframes foam-finger-spin-3d {
 	0% {
-		transform: translateY(0) perspective(1200px) rotateY(0deg) rotateX(0deg) scale(1);
+		transform: translateY(0) perspective(1200px) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth)) scale(1);
 	}
 	28% {
-		transform: translateY(-14%) perspective(1200px) rotateY(170deg) rotateX(10deg) scale(1.04);
+		transform: translateY(-14%) perspective(1200px) rotateX(calc(var(--scroll-glove-rotate-x) + 10deg)) rotateY(calc(var(--scroll-glove-rotate-y) + 170deg)) translateZ(calc(var(--scroll-glove-depth) + 10px)) scale(1.04);
 	}
 	56% {
-		transform: translateY(-20%) perspective(1200px) rotateY(300deg) rotateX(-9deg) scale(0.99);
+		transform: translateY(-20%) perspective(1200px) rotateX(calc(var(--scroll-glove-rotate-x) - 9deg)) rotateY(calc(var(--scroll-glove-rotate-y) + 300deg)) translateZ(calc(var(--scroll-glove-depth) + 18px)) scale(0.99);
 	}
 	76% {
-		transform: translateY(-13%) perspective(1200px) rotateY(338deg) rotateX(5deg) scale(1.01);
+		transform: translateY(-13%) perspective(1200px) rotateX(calc(var(--scroll-glove-rotate-x) + 5deg)) rotateY(calc(var(--scroll-glove-rotate-y) + 338deg)) translateZ(calc(var(--scroll-glove-depth) + 12px)) scale(1.01);
 	}
 	90% {
-		transform: translateY(-17%) perspective(1200px) rotateY(352deg) rotateX(-2deg) scale(1);
+		transform: translateY(-17%) perspective(1200px) rotateX(calc(var(--scroll-glove-rotate-x) - 2deg)) rotateY(calc(var(--scroll-glove-rotate-y) + 352deg)) translateZ(calc(var(--scroll-glove-depth) + 6px)) scale(1);
 	}
 	100% {
-		transform: translateY(0) perspective(1200px) rotateY(360deg) rotateX(0deg) scale(1);
+		transform: translateY(0) perspective(1200px) rotateX(var(--scroll-glove-rotate-x)) rotateY(calc(var(--scroll-glove-rotate-y) + 360deg)) translateZ(var(--scroll-glove-depth)) scale(1);
 	}
 }
 
 body.foam-fingers-dismissed .foam-finger-stack-left {
 	opacity: 0;
-	transform: translate(-26vw, -50%) rotate(-28deg) scale(0.92) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth));
+	transform: translate(-26vw, -50%) rotate(-28deg) scale(0.92);
 }
 
 body.foam-fingers-dismissed .foam-finger-stack-right {
 	opacity: 0;
-	transform: translate(26vw, -50%) scaleX(-1) rotate(-28deg) scale(0.92) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth));
+	transform: translate(26vw, -50%) scaleX(-1) rotate(-28deg) scale(0.92);
 }
 
 @media (min-width: 821px) {
@@ -174,7 +176,7 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 	}
 
 	.foam-finger {
-		opacity: 0.42;
+		opacity: 1;
 	}
 
 	.foam-finger-stack-left {
@@ -267,7 +269,6 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 	font-size: 30px;
 	padding: 10px 8px 10px 4px;
 	background: var(--color-tertiary);
-    opacity: 0.8;
 	color: white;
 }
 
@@ -1076,17 +1077,17 @@ body.seat-picker-open {
 	}
 
 	.foam-finger {
-		opacity: 0.55;
+		opacity: 0.8;
 	}
 
 	.foam-finger-stack-left {
 		left: -20vw;
-		transform: translateY(-52%) rotate(-10deg) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth));
+		transform: translateY(-52%) rotate(-10deg);
 	}
 
 	.foam-finger-stack-right {
 		right: -20vw;
-		transform: translateY(-52%) scaleX(-1) rotate(-10deg) rotateX(var(--scroll-glove-rotate-x)) rotateY(var(--scroll-glove-rotate-y)) translateZ(var(--scroll-glove-depth));
+		transform: translateY(-52%) scaleX(-1) rotate(-10deg);
 	}
 
 	.foam-finger-mark {
