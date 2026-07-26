@@ -56,6 +56,8 @@ YYYY-MM-Your-Site-Name/
   js/          ← leave empty; config.js is injected at build time
 ```
 
+For Cloudflare cache-busting, append `?v=__ASSET_VERSION__` to local static assets in HTML (for example CSS, JS, images, and downloadable files). `build.sh` replaces the token on deploy so browsers request fresh files after every push.
+
 ---
 
 ### 3 — Screenshot the old site and add it to the archive gallery
@@ -108,6 +110,8 @@ Commit and push — Cloudflare picks it up automatically.
 
 The build copies the current month's files to `dist/` and also copies `archive/` into `dist/archive/` so the gallery stays accessible at `/archive/archive.html`.
 
+`build.sh` also writes `dist/_headers` for Cloudflare Pages so HTML is always served with no-cache headers (`/` and `/*.html`), ensuring browsers fetch fresh documents after each deploy.
+
 ---
 
 ## First-time Supabase setup
@@ -125,8 +129,14 @@ The build copies the current month's files to `dist/` and also copies `archive/`
 ## Local dev
 
 ```bash
-python3 -m http.server 8080
-# open http://localhost:8080/2026-05-The-Dark-Council/
+npx --yes browser-sync start --config bs-config.cjs
+# open http://localhost:3000/2026-08-SPORTS/
 ```
 
 Config is not injected locally — create `js/config.js` manually from `js/config.example.js` (it's gitignored).
+
+The BrowserSync config sets strict response headers so the browser does not cache local assets:
+- `Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0`
+- `Pragma: no-cache`
+- `Expires: 0`
+- `Surrogate-Control: no-store`

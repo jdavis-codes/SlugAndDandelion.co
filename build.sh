@@ -40,6 +40,19 @@ if [ -d archive ]; then
   cp -r archive dist/archive
 fi
 
+# Ensure browsers always revalidate HTML documents on Cloudflare Pages.
+cat > dist/_headers <<'EOF'
+/
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+
+/*.html
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
+  Expires: 0
+EOF
+
 echo "Built dist/ from ${CURRENT_MONTH}"
 echo "Asset version: ${ASSET_VERSION}"
 echo "Done."
