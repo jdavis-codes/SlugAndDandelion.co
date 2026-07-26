@@ -10,6 +10,21 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="foam-fingers" aria-hidden="true">
+        <div class="foam-finger-stack foam-finger-stack-left">
+            <div class="foam-finger-card">
+                <img class="foam-finger foam-finger-left" src="assets/foam-finger.svg" alt="" />
+                <img class="foam-finger-mark foam-finger-mark-left" src="assets/c-toast.png" alt="" />
+            </div>
+        </div>
+        <div class="foam-finger-stack foam-finger-stack-right">
+            <div class="foam-finger-card">
+                <img class="foam-finger foam-finger-right" src="assets/foam-finger.svg" alt="" />
+                <img class="foam-finger-mark foam-finger-mark-right" src="assets/popcorn.png" alt="" />
+            </div>
+        </div>
+    </div>
+
     <main class="ticket">
         <img class="ticket-stadium-logo" src="assets/Stadium_logo_2.svg" alt="" aria-hidden="true" />
 
@@ -56,11 +71,11 @@
 
                     <div class="ticket-info-location">
                         <span>Stadium:</span>
-                        <span>100 Tremont St, Salem MA, 01970</span>
+                        <a href="https://maps.app.goo.gl/CU85SGmU69qftdGF7" target="_blank" rel="noopener noreferrer" aria-label="Open stadium location in Google Maps">100 Tremont St, Salem MA, 01970</a>
                     </div>
 
                     <div class="ticket-info-date">
-                        <p>Saturday August 15th, 3PM</p>
+                        <a href="assets/invite.ics" download="sports-invite.ics" aria-label="Download calendar invite for Saturday August 15th at 3PM">Saturday August 15th, 3PM</a>
                     </div>
                 </div>
 
@@ -106,14 +121,14 @@
                     </form>
 
                     <div class="ticket-info-misc">
-                        <p>*Skill at sports not required. Guests must be cool.</p>
+                        <p>*Skill at sports not required for entry. Must be 21+ to consume soda</p>
                     </div>
                 </div>
             </section>
         </section>
     </main>
 
-    <button type="submit" form="rsvp-form" class="reserve-btn">Reserve your spot</button>
+    <button type="submit" form="rsvp-form" class="reserve-btn">Reserve your spot*</button>
 
     <section class="bleachers-board" aria-labelledby="bleachers-board-title">
         <div class="bleachers-board-head">

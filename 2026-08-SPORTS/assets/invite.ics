@@ -1,0 +1,12 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Slug and Dandelion//World Series Grand Prix Cup Finals//EN
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+SUMMARY:Slug and Dandelion - World Series Grand Prix Cup Finals
+DTSTART:20260815T190000Z
+DTEND:20260815T230000Z
+LOCATION:100 Tremont St, Salem, MA 01970
+DESCRIPTION:SPORTS day at Slug and Dandelion Stadiums. Doors at 3PM local.
+END:VEVENT
+END:VCALENDAR

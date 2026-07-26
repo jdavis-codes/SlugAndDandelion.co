@@ -37,6 +37,10 @@ let supabaseClient = null;
 let activeConfig = null;
 let seatReservations = new Map();
 
+wireFoamFingerScrollEffect();
+wireFoamFingerSpinEffect();
+wireScrolljack3DEffect();
+
 function getConfig() {
   const cfg = window.SD_CONFIG || globalThis.SD_CONFIG || {};
   return {
@@ -237,17 +241,37 @@ function showButtonMessage(state, label) {
   if (state !== "loading") scheduleReset();
 }
 
-function launchConfetti() {
+function launchConfetti(options = {}) {
   if (!confettiLayer) return;
 
-  const colors = ["#f26522", "#1e88e5", "#ffffff", "#ffd166"];
-  const count = window.matchMedia("(max-width: 820px)").matches ? 90 : 140;
+  const defaultColors = ["#f26522", "#1e88e5", "#ffffff", "#ffd166"];
+  const palette = Array.isArray(options.colors) && options.colors.length > 0
+    ? options.colors
+    : defaultColors;
+  const isMobile = window.matchMedia("(max-width: 820px)").matches;
+  const count = Number.isFinite(options.count)
+    ? Math.max(1, Math.floor(options.count))
+    : (isMobile ? 90 : 140);
+  const centerVw = Number.isFinite(options.centerVw) ? options.centerVw : null;
+  const spreadVw = Number.isFinite(options.spreadVw)
+    ? Math.max(2, options.spreadVw)
+    : 80;
+  const startTopVh = Number.isFinite(options.startTopVh)
+    ? options.startTopVh
+    : -12;
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
   for (let i = 0; i < count; i += 1) {
     const piece = document.createElement("span");
     piece.className = "confetti-piece";
-    piece.style.left = `${10 + Math.random() * 80}vw`;
-    piece.style.backgroundColor = colors[i % colors.length];
+    const left = centerVw == null
+      ? 10 + Math.random() * 80
+      : clamp(centerVw + ((Math.random() - 0.5) * spreadVw), 1, 99);
+
+    piece.style.left = `${left}vw`;
+    piece.style.top = `${startTopVh}vh`;
+    piece.style.backgroundColor = palette[i % palette.length];
     piece.style.setProperty("--dx", `${-180 + Math.random() * 360}px`);
     piece.style.setProperty("--rot", `${180 + Math.random() * 960}deg`);
     piece.style.setProperty("--dur", `${1500 + Math.random() * 1200}ms`);
@@ -258,6 +282,228 @@ function launchConfetti() {
       piece.remove();
     }, 3200);
   }
+}
+
+function wireFoamFingerScrollEffect() {
+  if (typeof window === "undefined" || !document.body) return;
+
+  const mobileQuery = window.matchMedia("(max-width: 820px)");
+  const DISMISS_SCROLL_Y = 28;
+  let ticking = false;
+
+  const getScrollY = () => {
+    return (
+      window.scrollY ||
+      window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      0
+    );
+  };
+
+  const applyState = () => {
+    ticking = false;
+
+    const shouldDismiss = mobileQuery.matches && getScrollY() > DISMISS_SCROLL_Y;
+    document.body.classList.toggle("foam-fingers-dismissed", shouldDismiss);
+  };
+
+  const queueApplyState = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(applyState);
+  };
+
+  window.addEventListener("scroll", queueApplyState, { passive: true });
+  window.addEventListener("touchmove", queueApplyState, { passive: true });
+  window.addEventListener("resize", queueApplyState, { passive: true });
+  window.addEventListener("orientationchange", queueApplyState);
+
+  if (typeof mobileQuery.addEventListener === "function") {
+    mobileQuery.addEventListener("change", queueApplyState);
+  } else if (typeof mobileQuery.addListener === "function") {
+    mobileQuery.addListener(queueApplyState);
+  }
+
+  queueApplyState();
+}
+
+function wireFoamFingerSpinEffect() {
+  const stacks = Array.from(document.querySelectorAll(".foam-finger-stack"));
+  if (stacks.length === 0) return;
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  const triggerSpin = (stack) => {
+    for (const other of stacks) {
+      if (other === stack) continue;
+      other.classList.remove("is-active", "is-spinning");
+    }
+
+    stack.classList.add("is-active");
+    stack.classList.remove("is-spinning");
+    void stack.offsetWidth;
+    stack.classList.add("is-spinning");
+  };
+
+  const triggerGloveConfetti = (stack) => {
+    const rect = stack.getBoundingClientRect();
+    const viewportWidth = Math.max(window.innerWidth || 1, 1);
+    const viewportHeight = Math.max(window.innerHeight || 1, 1);
+    const isMobile = window.matchMedia("(max-width: 820px)").matches;
+
+    const gloveColor = stack.classList.contains("foam-finger-stack-left")
+      ? "#f26522"
+      : "#1e88e5";
+
+    const centerVw = clamp(((rect.left + (rect.width / 2)) / viewportWidth) * 100, 3, 97);
+    const startTopVh = clamp(((rect.top - (rect.height * 0.12)) / viewportHeight) * 100, -22, 20);
+
+    launchConfetti({
+      count: isMobile ? 40 : 64,
+      centerVw,
+      spreadVw: isMobile ? 22 : 16,
+      startTopVh,
+      colors: [gloveColor]
+    });
+  };
+
+  for (const stack of stacks) {
+    stack.addEventListener("click", () => {
+      triggerSpin(stack);
+      triggerGloveConfetti(stack);
+    });
+
+    const card = stack.querySelector(".foam-finger-card");
+    card?.addEventListener("animationend", () => {
+      stack.classList.remove("is-spinning");
+    });
+  }
+}
+
+function wireScrolljack3DEffect() {
+  if (typeof window === "undefined") return;
+
+  const ticket = document.querySelector(".ticket");
+  const board = document.querySelector(".bleachers-board");
+  const gloveStacks = Array.from(document.querySelectorAll(".foam-finger-stack"));
+  if (!ticket && !board && gloveStacks.length === 0) return;
+
+  const mobileQuery = window.matchMedia("(max-width: 820px)");
+  const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let ticking = false;
+  let desktopListenersBound = false;
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const getScrollY = () => {
+    return (
+      window.scrollY ||
+      window.pageYOffset ||
+      document.documentElement.scrollTop ||
+      0
+    );
+  };
+
+  const clearTransforms = () => {
+    ticket?.style.removeProperty("transform");
+    board?.style.removeProperty("transform");
+    for (const stack of gloveStacks) {
+      stack.style.removeProperty("--scroll-glove-rotate-x");
+      stack.style.removeProperty("--scroll-glove-rotate-y");
+      stack.style.removeProperty("--scroll-glove-depth");
+    }
+  };
+
+  const apply = () => {
+    ticking = false;
+
+      if (mobileQuery.matches || reduceMotionQuery.matches || document.body.classList.contains("seat-picker-open")) {
+      clearTransforms();
+      return;
+    }
+
+    const y = getScrollY();
+    const vh = Math.max(window.innerHeight || 1, 1);
+    const isMobile = mobileQuery.matches;
+
+    const primaryProgress = clamp(y / (vh * 1.2), 0, 1.4);
+    const wave = Math.sin(y * 0.004);
+
+    if (ticket) {
+        const rotateX = -(isMobile ? 11 : 18) * primaryProgress;
+        const rotateY = wave * (isMobile ? 5.6 : 10.4);
+      ticket.style.transform = `perspective(1400px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
+    }
+
+    if (board) {
+      const boardProgress = clamp((y - vh * 0.15) / (vh * 1.1), 0, 1.2);
+        const rotateX = (1 - boardProgress) * (isMobile ? 4 : 1);
+        const rotateY = -wave * (isMobile ? 4.4 : 8.4);
+      board.style.transform = `perspective(1400px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
+    }
+
+    if (gloveStacks.length > 0) {
+      const gloveProgress = clamp(y / (vh * 0.9), 0, 1.4);
+        const gloveRotateX = (isMobile ? 30 : 44) * (0.35 + gloveProgress * 0.65);
+        const gloveDepth = (isMobile ? 24 : 48) * gloveProgress;
+        const gloveWave = Math.sin(y * 0.006) * (isMobile ? 32 : 88);
+
+      gloveStacks.forEach((stack, index) => {
+        const direction = index === 0 ? -1 : 1;
+        const gloveRotateY = gloveWave * direction;
+
+        stack.style.setProperty("--scroll-glove-rotate-x", `${gloveRotateX.toFixed(2)}deg`);
+        stack.style.setProperty("--scroll-glove-rotate-y", `${gloveRotateY.toFixed(2)}deg`);
+        stack.style.setProperty("--scroll-glove-depth", `${gloveDepth.toFixed(2)}px`);
+      });
+    }
+  };
+
+  const queueApply = () => {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(apply);
+  };
+
+    const addDesktopListeners = () => {
+      if (desktopListenersBound) return;
+      desktopListenersBound = true;
+      window.addEventListener("scroll", queueApply, { passive: true });
+      window.addEventListener("resize", queueApply, { passive: true });
+      window.addEventListener("orientationchange", queueApply);
+    };
+
+    const removeDesktopListeners = () => {
+      if (!desktopListenersBound) return;
+      desktopListenersBound = false;
+      window.removeEventListener("scroll", queueApply);
+      window.removeEventListener("resize", queueApply);
+      window.removeEventListener("orientationchange", queueApply);
+    };
+
+    const syncMode = () => {
+      if (mobileQuery.matches || reduceMotionQuery.matches) {
+        removeDesktopListeners();
+        clearTransforms();
+        return;
+      }
+
+      addDesktopListeners();
+      queueApply();
+    };
+
+  if (typeof mobileQuery.addEventListener === "function") {
+      mobileQuery.addEventListener("change", syncMode);
+  } else if (typeof mobileQuery.addListener === "function") {
+      mobileQuery.addListener(syncMode);
+  }
+
+  if (typeof reduceMotionQuery.addEventListener === "function") {
+      reduceMotionQuery.addEventListener("change", syncMode);
+  } else if (typeof reduceMotionQuery.addListener === "function") {
+      reduceMotionQuery.addListener(syncMode);
+  }
+
+    syncMode();
 }
 
 function getSupabaseClient(cfg) {
