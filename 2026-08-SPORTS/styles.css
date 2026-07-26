@@ -732,6 +732,35 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 	letter-spacing: 0.6px;
 }
 
+.archive-link-wrap {
+	width: min(1240px, calc(100vw - 40px));
+	margin-top: 14px;
+	margin-bottom: 6px;
+	text-align: center;
+	position: relative;
+	z-index: 2;
+}
+
+.archive-link {
+	display: inline-block;
+	padding: 10px 16px;
+	font-family: var(--font-heading);
+	font-size: 14px;
+	letter-spacing: 1.2px;
+	text-transform: uppercase;
+	color: var(--color-primary);
+	background: var(--color-secondary);
+	border: 2px solid var(--color-primary);
+	text-decoration: none;
+	transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.archive-link:hover,
+.archive-link:focus-visible {
+	transform: translateY(-1px);
+	filter: brightness(1.08);
+}
+
 .bleachers-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1294,6 +1323,17 @@ body.seat-picker-open {
 	.bleachers-board {
 		margin-top: 14px;
 		padding: 12px;
+	}
+
+	.archive-link-wrap {
+		width: calc(100vw - 40px);
+		margin-top: 12px;
+	}
+
+	.archive-link {
+		width: 100%;
+		max-width: 520px;
+		font-size: 13px;
 	}
 
 	.bleachers-grid {
