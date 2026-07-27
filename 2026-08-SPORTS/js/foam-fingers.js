@@ -82,7 +82,6 @@ function wireFoamFingerSpinEffect(launchConfetti, onTeamClick) {
 
     const rect = stack.getBoundingClientRect();
     const viewportWidth = Math.max(window.innerWidth || 1, 1);
-    const viewportHeight = Math.max(window.innerHeight || 1, 1);
     const isMobile = window.matchMedia("(max-width: 820px)").matches;
 
     const gloveColor = stack.classList.contains("foam-finger-stack-left")
@@ -90,7 +89,7 @@ function wireFoamFingerSpinEffect(launchConfetti, onTeamClick) {
       : "#1e88e5";
 
     const centerVw = clamp(((rect.left + (rect.width / 2)) / viewportWidth) * 100, 3, 97);
-    const startTopVh = clamp(((rect.top - (rect.height * 0.12)) / viewportHeight) * 100, -22, 20);
+    const startTopVh = -12;
 
     launchConfetti({
       count: isMobile ? 40 : 64,
