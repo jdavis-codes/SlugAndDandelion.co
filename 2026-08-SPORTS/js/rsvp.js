@@ -33,6 +33,13 @@ const CROWD_MESSAGE_MAX = 32;
 const TEAM_CLICK_COUNTER_RPC = "increment_toasters_poppers_clicks";
 const REGISTER_VISITOR_RPC = "register_site_visitor";
 const SITE_VISITOR_ID_KEY = "sd_sports_site_visitor_id_v1";
+const BLOCKED_TEAM_CLICK_VISITOR_IDS = new Set([
+  "023a63849d2343fc",
+  "713cf12326234a4c",
+  "ms3l4ijpw8c0jnbj",
+  "3efa52702bf14eeb",
+  "2592aa03440740b7"
+]);
 
 let defaultButtonText = reserveBtn?.textContent?.trim() || "Reserve your spot";
 let loadingTimer = null;
@@ -294,6 +301,7 @@ function launchConfetti(options = {}) {
 
 async function trackTeamClick(team) {
   if (teamClickCounterUnsupported) return;
+  if (isBlockedTeamClickVisitor()) return;
 
   const normalizedTeam = String(team || "").trim().toLowerCase();
   if (normalizedTeam !== "toasters" && normalizedTeam !== "poppers") return;
@@ -310,6 +318,16 @@ async function trackTeamClick(team) {
   const message = String(error.message || "");
   if (code === "42883" || /increment_toasters_poppers_clicks|does not exist/i.test(message)) {
     teamClickCounterUnsupported = true;
+  }
+}
+
+function isBlockedTeamClickVisitor() {
+  try {
+    const visitorId = String(localStorage.getItem(SITE_VISITOR_ID_KEY) || "").trim().toLowerCase();
+    if (!visitorId) return false;
+    return BLOCKED_TEAM_CLICK_VISITOR_IDS.has(visitorId);
+  } catch (_) {
+    return false;
   }
 }
 
