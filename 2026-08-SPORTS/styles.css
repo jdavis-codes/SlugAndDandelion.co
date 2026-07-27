@@ -65,19 +65,23 @@ h4 {
 }
 
 .foam-fingers {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	pointer-events: none;
-	overflow: hidden;
+	overflow: visible;
 	z-index: 2;
-	--ticket-shell-width: min(800px, calc(100vw - 40px));
+}
+
+.ticket-stage {
+	position: relative;
+	width: min(800px, 100%);
 }
 
 .foam-finger-stack {
 	position: absolute;
 	top: 50%;
 	height: 70vh;
-	max-height: 900px;
+	max-height: 550px;
 	min-height: 320px;
 	pointer-events: auto;
 	cursor: pointer;
@@ -187,18 +191,22 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 }
 
 @media (min-width: 821px) {
+	.foam-finger-stack {
+		top: 75%;
+	}
+
 	.foam-finger {
 		opacity: 1;
 	}
 
 	.foam-finger-stack-left {
 		left: auto;
-		right: calc(50% + (var(--ticket-shell-width) / 2) + 24px);
+		right: calc(100% + 24px);
 	}
 
 	.foam-finger-stack-right {
 		right: auto;
-		left: calc(50% + (var(--ticket-shell-width) / 2) + 24px);
+		left: calc(100% + 24px);
 	}
 }
 
