@@ -309,12 +309,15 @@ async function trackTeamClick(team) {
 
   const normalizedTeam = String(team || "").trim().toLowerCase();
   if (normalizedTeam !== "toasters" && normalizedTeam !== "poppers") return;
+  const visitorId = getOrCreateSiteVisitorId();
 
   const cfg = await getActiveConfig();
   if (!cfg) return;
 
   const supabase = getSupabaseClient(cfg);
-  const { data, error } = await supabase.rpc(TEAM_CLICK_COUNTER_RPC, { p_team: normalizedTeam });
+  const rpcArgs = { p_team: normalizedTeam };
+  if (visitorId) rpcArgs.p_visitor_id = visitorId;
+  const { data, error } = await supabase.rpc(TEAM_CLICK_COUNTER_RPC, rpcArgs);
 
   if (!error) {
     applyTeamClickCounterPayload(data);
@@ -834,8 +837,10 @@ async function onSubmit(event) {
   await refreshSeatReservations();
 
   const guests = clampGuests(formData.get("guests"));
+  const visitorId = getOrCreateSiteVisitorId();
   const payload = {
     name,
+    visitor_id: normalizeOptional(visitorId, 64),
     guests,
     phone: normalizeOptional(formData.get("phone"), 30),
     email: normalizeOptional(formData.get("email"), 120),
