@@ -175,7 +175,7 @@ function wireScrolljack3DEffect() {
 
     if (ticket) {
       const rotateX = -(isMobile ? 11 : 18) * primaryProgress;
-      const rotateY = wave * (isMobile ? 5.6 : 10.4);
+      const rotateY = wave * (isMobile ? 5.6 : 20.4);
       ticket.style.transform = `perspective(1400px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
     }
 
@@ -188,9 +188,9 @@ function wireScrolljack3DEffect() {
 
     if (gloveStacks.length > 0) {
       const gloveProgress = clamp(y / (vh * 0.9), 0, 1.4);
-      const gloveRotateX = (isMobile ? 30 : 44) * (0.35 + gloveProgress * 0.65);
+      const gloveRotateX = (isMobile ? 30 : 44) * -(0.35 + gloveProgress * 1.65);
       const gloveDepth = (isMobile ? 24 : 48) * gloveProgress;
-      const gloveWave = Math.sin(y * 0.006) * (isMobile ? 32 : 88);
+      const gloveWave = Math.sin(y * 0.03) * (isMobile ? 32 : 32);
 
       gloveStacks.forEach((stack, index) => {
         if (stack.classList.contains("is-spinning")) {

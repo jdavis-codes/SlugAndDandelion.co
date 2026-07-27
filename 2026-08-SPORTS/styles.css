@@ -784,6 +784,42 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 	filter: brightness(1.08);
 }
 
+.team-click-counter {
+	position: absolute;
+	top: 90px;
+    text-align: center;
+	right: 32px;
+	width: 1ch;
+	text-align: center;
+	white-space: normal;
+	word-break: break-all;
+	transform: translate(-50%, -50%);
+	font-family: var(--font-jersey);
+	font-size: 40px;
+	line-height: 0.8;
+	letter-spacing: 1px;
+	opacity: 0.1;
+    max-width: 1ch;
+	/* text-shadow: 0 0 6px rgba(0, 0, 0, 0.22); */
+	user-select: none;
+	pointer-events: none;
+	z-index: 5;
+    display: inline-block; 
+    min-width: 1ch
+}
+
+.team-click-counter-toasters {
+	color: #7f3a16;
+}
+
+.team-click-counter-poppers {
+	color: #164d78;
+}
+
+.foam-finger-stack-right .team-click-counter-poppers {
+	transform: translate(-50%, -50%) scaleX(-1);
+}
+
 .bleachers-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1358,6 +1394,11 @@ body.seat-picker-open {
 		width: 100%;
 		max-width: 520px;
 		font-size: 13px;
+	}
+
+	.team-click-counter {
+		font-size: 34px;
+		opacity: 0.18;
 	}
 
 	.bleachers-grid {

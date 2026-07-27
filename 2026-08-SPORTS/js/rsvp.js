@@ -20,6 +20,8 @@ const seatPickerGrid = document.getElementById("seat-picker-grid");
 const bleachersBoardGrid = document.getElementById("bleachers-board-grid");
 const seatPickerOpeners = document.querySelectorAll("[data-open-seat-picker]");
 const seatPickerClosers = document.querySelectorAll("[data-close-seat-picker]");
+const toastersClickCountEl = document.getElementById("team-click-count-toasters");
+const poppersClickCountEl = document.getElementById("team-click-count-poppers");
 
 const DRAFT_KEY = "sd_sports_rsvp_draft_v2";
 const SUBMITTED_KEY = "sd_sports_rsvp_submitted_v1";
@@ -31,6 +33,7 @@ const ROW_RENDER_ORDER = ["D", "C", "B", "A"];
 const SEAT_VALUES = ["1", "2", "3", "4"];
 const CROWD_MESSAGE_MAX = 32;
 const TEAM_CLICK_COUNTER_RPC = "increment_toasters_poppers_clicks";
+const GET_TEAM_CLICK_COUNTER_RPC = "get_toasters_poppers_click_counter";
 const REGISTER_VISITOR_RPC = "register_site_visitor";
 const SITE_VISITOR_ID_KEY = "sd_sports_site_visitor_id_v1";
 const BLOCKED_TEAM_CLICK_VISITOR_IDS = new Set([
@@ -54,6 +57,7 @@ initFoamFingerEffects({
   launchConfetti,
   onTeamClick: trackTeamClick
 });
+void refreshTeamClickCounterDisplay();
 void trackUniqueVisitor();
 
 function getConfig() {
@@ -310,13 +314,60 @@ async function trackTeamClick(team) {
   if (!cfg) return;
 
   const supabase = getSupabaseClient(cfg);
-  const { error } = await supabase.rpc(TEAM_CLICK_COUNTER_RPC, { p_team: normalizedTeam });
+  const { data, error } = await supabase.rpc(TEAM_CLICK_COUNTER_RPC, { p_team: normalizedTeam });
 
-  if (!error) return;
+  if (!error) {
+    applyTeamClickCounterPayload(data);
+    return;
+  }
 
   const code = String(error.code || "").trim();
   const message = String(error.message || "");
   if (code === "42883" || /increment_toasters_poppers_clicks|does not exist/i.test(message)) {
+    teamClickCounterUnsupported = true;
+  }
+}
+
+function normalizeCounterValue(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.floor(n));
+}
+
+function renderTeamClickCounterDisplay(toastersClicks, poppersClicks) {
+  if (toastersClickCountEl) {
+    toastersClickCountEl.textContent = String(normalizeCounterValue(toastersClicks));
+  }
+
+  if (poppersClickCountEl) {
+    poppersClickCountEl.textContent = String(normalizeCounterValue(poppersClicks));
+  }
+}
+
+function applyTeamClickCounterPayload(payload) {
+  const toastersClicks = normalizeCounterValue(payload?.toasters_clicks);
+  const poppersClicks = normalizeCounterValue(payload?.poppers_clicks);
+  renderTeamClickCounterDisplay(toastersClicks, poppersClicks);
+}
+
+async function refreshTeamClickCounterDisplay() {
+  if (teamClickCounterUnsupported) return;
+  if (!toastersClickCountEl && !poppersClickCountEl) return;
+
+  const cfg = await getActiveConfig();
+  if (!cfg) return;
+
+  const supabase = getSupabaseClient(cfg);
+  const { data, error } = await supabase.rpc(GET_TEAM_CLICK_COUNTER_RPC);
+
+  if (!error) {
+    applyTeamClickCounterPayload(data);
+    return;
+  }
+
+  const code = String(error.code || "").trim();
+  const message = String(error.message || "");
+  if (code === "42883" || /get_toasters_poppers_click_counter|does not exist/i.test(message)) {
     teamClickCounterUnsupported = true;
   }
 }
