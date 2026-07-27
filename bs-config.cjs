@@ -1,6 +1,11 @@
 module.exports = {
   server: {
     baseDir: ".",
+    serveStaticOptions: {
+      etag: false,
+      lastModified: false,
+      cacheControl: false,
+    },
     middleware: [
       (req, res, next) => {
         // Force no-cache behavior for all local dev responses.

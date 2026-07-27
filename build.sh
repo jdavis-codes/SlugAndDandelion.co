@@ -40,14 +40,9 @@ if [ -d archive ]; then
   cp -r archive dist/archive
 fi
 
-# Ensure browsers always revalidate HTML documents on Cloudflare Pages.
+# Disable browser caching for all files served by Cloudflare Pages.
 cat > dist/_headers <<'EOF'
-/
-  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
-  Pragma: no-cache
-  Expires: 0
-
-/*.html
+/*
   Cache-Control: no-store, no-cache, must-revalidate, max-age=0
   Pragma: no-cache
   Expires: 0

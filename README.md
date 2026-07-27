@@ -110,7 +110,7 @@ Commit and push — Cloudflare picks it up automatically.
 
 The build copies the current month's files to `dist/` and also copies `archive/` into `dist/archive/` so the gallery stays accessible at `/archive/archive.html`.
 
-`build.sh` also writes `dist/_headers` for Cloudflare Pages so HTML is always served with no-cache headers (`/` and `/*.html`), ensuring browsers fetch fresh documents after each deploy.
+`build.sh` also writes `dist/_headers` for Cloudflare Pages so all deployed files are served with no-cache headers (`/*`), ensuring browsers fetch fresh documents and assets after each deploy.
 
 ---
 
@@ -140,3 +140,5 @@ The BrowserSync config sets strict response headers so the browser does not cach
 - `Pragma: no-cache`
 - `Expires: 0`
 - `Surrogate-Control: no-store`
+
+It also disables `ETag` and `Last-Modified` in static responses to prevent revalidation-based cache reuse.
