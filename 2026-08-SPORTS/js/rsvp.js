@@ -1,4 +1,5 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { initFoamFingerEffects } from "./foam-fingers.js";
 
 const rsvpForm = document.getElementById("rsvp-form");
 const jerseyInput = document.getElementById("jersey-number");
@@ -29,6 +30,9 @@ const ROW_VALUES = ["A", "B", "C", "D"];
 const ROW_RENDER_ORDER = ["D", "C", "B", "A"];
 const SEAT_VALUES = ["1", "2", "3", "4"];
 const CROWD_MESSAGE_MAX = 32;
+const TEAM_CLICK_COUNTER_RPC = "increment_toasters_poppers_clicks";
+const REGISTER_VISITOR_RPC = "register_site_visitor";
+const SITE_VISITOR_ID_KEY = "sd_sports_site_visitor_id_v1";
 
 let defaultButtonText = reserveBtn?.textContent?.trim() || "Reserve your spot";
 let loadingTimer = null;
@@ -36,10 +40,14 @@ let resetTimer = null;
 let supabaseClient = null;
 let activeConfig = null;
 let seatReservations = new Map();
+let teamClickCounterUnsupported = false;
+let siteVisitorTrackingUnsupported = false;
 
-wireFoamFingerScrollEffect();
-wireFoamFingerSpinEffect();
-wireScrolljack3DEffect();
+initFoamFingerEffects({
+  launchConfetti,
+  onTeamClick: trackTeamClick
+});
+void trackUniqueVisitor();
 
 function getConfig() {
   const cfg = window.SD_CONFIG || globalThis.SD_CONFIG || {};
@@ -284,244 +292,75 @@ function launchConfetti(options = {}) {
   }
 }
 
-function wireFoamFingerScrollEffect() {
-  if (typeof window === "undefined" || !document.body) return;
+async function trackTeamClick(team) {
+  if (teamClickCounterUnsupported) return;
 
-  const mobileQuery = window.matchMedia("(max-width: 820px)");
-  const DISMISS_SCROLL_Y = 28;
-  let ticking = false;
+  const normalizedTeam = String(team || "").trim().toLowerCase();
+  if (normalizedTeam !== "toasters" && normalizedTeam !== "poppers") return;
 
-  const getScrollY = () => {
-    return (
-      window.scrollY ||
-      window.pageYOffset ||
-      document.documentElement.scrollTop ||
-      0
-    );
-  };
+  const cfg = await getActiveConfig();
+  if (!cfg) return;
 
-  const applyState = () => {
-    ticking = false;
+  const supabase = getSupabaseClient(cfg);
+  const { error } = await supabase.rpc(TEAM_CLICK_COUNTER_RPC, { p_team: normalizedTeam });
 
-    const shouldDismiss = mobileQuery.matches && getScrollY() > DISMISS_SCROLL_Y;
-    document.body.classList.toggle("foam-fingers-dismissed", shouldDismiss);
-  };
+  if (!error) return;
 
-  const queueApplyState = () => {
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(applyState);
-  };
-
-  window.addEventListener("scroll", queueApplyState, { passive: true });
-  window.addEventListener("touchmove", queueApplyState, { passive: true });
-  window.addEventListener("resize", queueApplyState, { passive: true });
-  window.addEventListener("orientationchange", queueApplyState);
-
-  if (typeof mobileQuery.addEventListener === "function") {
-    mobileQuery.addEventListener("change", queueApplyState);
-  } else if (typeof mobileQuery.addListener === "function") {
-    mobileQuery.addListener(queueApplyState);
-  }
-
-  queueApplyState();
-}
-
-function wireFoamFingerSpinEffect() {
-  const stacks = Array.from(document.querySelectorAll(".foam-finger-stack"));
-  if (stacks.length === 0) return;
-
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-    const notifySpinStateChange = () => {
-      window.dispatchEvent(new CustomEvent("foam-finger-spin-state-change"));
-    };
-
-  const triggerSpin = (stack) => {
-    for (const other of stacks) {
-      if (other === stack) continue;
-      other.classList.remove("is-active", "is-spinning");
-    }
-
-    stack.classList.add("is-active");
-    stack.classList.remove("is-spinning");
-    void stack.offsetWidth;
-    stack.classList.add("is-spinning");
-      notifySpinStateChange();
-  };
-
-  const triggerGloveConfetti = (stack) => {
-    const rect = stack.getBoundingClientRect();
-    const viewportWidth = Math.max(window.innerWidth || 1, 1);
-    const viewportHeight = Math.max(window.innerHeight || 1, 1);
-    const isMobile = window.matchMedia("(max-width: 820px)").matches;
-
-    const gloveColor = stack.classList.contains("foam-finger-stack-left")
-      ? "#f26522"
-      : "#1e88e5";
-
-    const centerVw = clamp(((rect.left + (rect.width / 2)) / viewportWidth) * 100, 3, 97);
-    const startTopVh = clamp(((rect.top - (rect.height * 0.12)) / viewportHeight) * 100, -22, 20);
-
-    launchConfetti({
-      count: isMobile ? 40 : 64,
-      centerVw,
-      spreadVw: isMobile ? 22 : 16,
-      startTopVh,
-      colors: [gloveColor]
-    });
-  };
-
-  for (const stack of stacks) {
-    stack.addEventListener("click", () => {
-      triggerSpin(stack);
-      triggerGloveConfetti(stack);
-    });
-
-    const card = stack.querySelector(".foam-finger-card");
-    card?.addEventListener("animationend", () => {
-      stack.classList.remove("is-spinning");
-        notifySpinStateChange();
-    });
+  const code = String(error.code || "").trim();
+  const message = String(error.message || "");
+  if (code === "42883" || /increment_toasters_poppers_clicks|does not exist/i.test(message)) {
+    teamClickCounterUnsupported = true;
   }
 }
 
-function wireScrolljack3DEffect() {
-  if (typeof window === "undefined") return;
-
-  const ticket = document.querySelector(".ticket");
-  const board = document.querySelector(".bleachers-board");
-  const gloveStacks = Array.from(document.querySelectorAll(".foam-finger-stack"));
-  if (!ticket && !board && gloveStacks.length === 0) return;
-
-  const mobileQuery = window.matchMedia("(max-width: 820px)");
-  const reduceMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-  let ticking = false;
-  let desktopListenersBound = false;
-
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-  const getScrollY = () => {
-    return (
-      window.scrollY ||
-      window.pageYOffset ||
-      document.documentElement.scrollTop ||
-      0
-    );
-  };
-
-  const clearTransforms = () => {
-    ticket?.style.removeProperty("transform");
-    board?.style.removeProperty("transform");
-    for (const stack of gloveStacks) {
-      stack.style.removeProperty("--scroll-glove-rotate-x");
-      stack.style.removeProperty("--scroll-glove-rotate-y");
-      stack.style.removeProperty("--scroll-glove-depth");
+function createSiteVisitorId() {
+  try {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      return crypto.randomUUID().replace(/-/g, "").slice(0, 16);
     }
-  };
-
-  const apply = () => {
-    ticking = false;
-
-      if (mobileQuery.matches || reduceMotionQuery.matches || document.body.classList.contains("seat-picker-open")) {
-      clearTransforms();
-      return;
-    }
-
-    const y = getScrollY();
-    const vh = Math.max(window.innerHeight || 1, 1);
-    const isMobile = mobileQuery.matches;
-
-    const primaryProgress = clamp(y / (vh * 1.2), 0, 1.4);
-    const wave = Math.sin(y * 0.004);
-
-    if (ticket) {
-        const rotateX = -(isMobile ? 11 : 18) * primaryProgress;
-        const rotateY = wave * (isMobile ? 5.6 : 10.4);
-      ticket.style.transform = `perspective(1400px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
-    }
-
-    if (board) {
-      const boardProgress = clamp((y - vh * 0.15) / (vh * 1.1), 0, 1.2);
-        const rotateX = (1 - boardProgress) * (isMobile ? 4 : 1);
-        const rotateY = -wave * (isMobile ? 4.4 : 8.4);
-      board.style.transform = `perspective(1400px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`;
-    }
-
-    if (gloveStacks.length > 0) {
-      const gloveProgress = clamp(y / (vh * 0.9), 0, 1.4);
-        const gloveRotateX = (isMobile ? 30 : 44) * (0.35 + gloveProgress * 0.65);
-        const gloveDepth = (isMobile ? 24 : 48) * gloveProgress;
-        const gloveWave = Math.sin(y * 0.006) * (isMobile ? 32 : 88);
-
-      gloveStacks.forEach((stack, index) => {
-          if (stack.classList.contains("is-spinning")) {
-            stack.style.setProperty("--scroll-glove-rotate-x", "0deg");
-            stack.style.setProperty("--scroll-glove-rotate-y", "0deg");
-            stack.style.setProperty("--scroll-glove-depth", "0px");
-            return;
-          }
-
-        const direction = index === 0 ? -1 : 1;
-        const gloveRotateY = gloveWave * direction;
-
-        stack.style.setProperty("--scroll-glove-rotate-x", `${gloveRotateX.toFixed(2)}deg`);
-        stack.style.setProperty("--scroll-glove-rotate-y", `${gloveRotateY.toFixed(2)}deg`);
-        stack.style.setProperty("--scroll-glove-depth", `${gloveDepth.toFixed(2)}px`);
-      });
-    }
-  };
-
-  const queueApply = () => {
-    if (ticking) return;
-    ticking = true;
-    window.requestAnimationFrame(apply);
-  };
-
-    const onSpinStateChange = () => {
-      queueApply();
-    };
-
-    window.addEventListener("foam-finger-spin-state-change", onSpinStateChange);
-
-    const addDesktopListeners = () => {
-      if (desktopListenersBound) return;
-      desktopListenersBound = true;
-      window.addEventListener("scroll", queueApply, { passive: true });
-      window.addEventListener("resize", queueApply, { passive: true });
-      window.addEventListener("orientationchange", queueApply);
-    };
-
-    const removeDesktopListeners = () => {
-      if (!desktopListenersBound) return;
-      desktopListenersBound = false;
-      window.removeEventListener("scroll", queueApply);
-      window.removeEventListener("resize", queueApply);
-      window.removeEventListener("orientationchange", queueApply);
-    };
-
-    const syncMode = () => {
-      if (mobileQuery.matches || reduceMotionQuery.matches) {
-        removeDesktopListeners();
-        clearTransforms();
-        return;
-      }
-
-      addDesktopListeners();
-      queueApply();
-    };
-
-  if (typeof mobileQuery.addEventListener === "function") {
-      mobileQuery.addEventListener("change", syncMode);
-  } else if (typeof mobileQuery.addListener === "function") {
-      mobileQuery.addListener(syncMode);
+  } catch (_) {
+    // Ignore runtime crypto availability issues.
   }
 
-  if (typeof reduceMotionQuery.addEventListener === "function") {
-      reduceMotionQuery.addEventListener("change", syncMode);
-  } else if (typeof reduceMotionQuery.addListener === "function") {
-      reduceMotionQuery.addListener(syncMode);
-  }
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).slice(2, 10);
+  return `${timestamp}${random}`.slice(0, 16);
+}
 
-    syncMode();
+function getOrCreateSiteVisitorId() {
+  try {
+    const existing = String(localStorage.getItem(SITE_VISITOR_ID_KEY) || "").trim();
+    if (existing) return existing;
+
+    const nextId = createSiteVisitorId();
+    if (!nextId) return null;
+
+    localStorage.setItem(SITE_VISITOR_ID_KEY, nextId);
+    return nextId;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function trackUniqueVisitor() {
+  if (siteVisitorTrackingUnsupported) return;
+
+  const visitorId = getOrCreateSiteVisitorId();
+  if (!visitorId) return;
+
+  const cfg = await getActiveConfig();
+  if (!cfg) return;
+
+  const supabase = getSupabaseClient(cfg);
+  const { error } = await supabase.rpc(REGISTER_VISITOR_RPC, { p_visitor_id: visitorId });
+
+  if (!error) return;
+
+  const code = String(error.code || "").trim();
+  const message = String(error.message || "");
+  if (code === "42883" || /register_site_visitor|does not exist/i.test(message)) {
+    siteVisitorTrackingUnsupported = true;
+  }
 }
 
 function getSupabaseClient(cfg) {

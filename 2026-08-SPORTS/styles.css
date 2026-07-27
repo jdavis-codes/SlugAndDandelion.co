@@ -40,6 +40,22 @@ body {
 	font-family: var(--font-body);
 }
 
+#stadium-favicon-bg {
+	position: fixed;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+	z-index: 0;
+}
+
+.stadium-favicon-row {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	background-repeat: repeat-x;
+	background-position: 0 center;
+}
+
 h3,
 h4 {
 	font-family: var(--font-heading);
@@ -53,7 +69,7 @@ h4 {
 	inset: 0;
 	pointer-events: none;
 	overflow: hidden;
-	z-index: 1;
+	z-index: 2;
 	--ticket-shell-width: min(800px, calc(100vw - 40px));
 }
 
@@ -171,10 +187,6 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 }
 
 @media (min-width: 821px) {
-	.foam-fingers {
-		z-index: 0;
-	}
-
 	.foam-finger {
 		opacity: 1;
 	}
@@ -219,6 +231,7 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 	transform-style: preserve-3d;
 	will-change: transform;
 	transition: transform 180ms linear;
+	z-index: 1;
 	/* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); */
 }
 
@@ -713,6 +726,8 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 	transform-style: preserve-3d;
 	will-change: transform;
 	transition: transform 180ms linear;
+	position: relative;
+	z-index: 3;
 }
 
 .bleachers-board .bleachers-board-head {
@@ -738,7 +753,7 @@ body.foam-fingers-dismissed .foam-finger-stack-right {
 	margin-bottom: 6px;
 	text-align: center;
 	position: relative;
-	z-index: 2;
+	z-index: 3;
 }
 
 .archive-link {
@@ -976,6 +991,7 @@ body.seat-picker-open {
 	cursor: pointer;
 	box-shadow: 0 6px 0 var(--color-reserve-underlay);
 	position: relative;
+	z-index: 1;
 	overflow: hidden;
 	transition: transform 0.05s ease, box-shadow 0.05s ease;
 }
